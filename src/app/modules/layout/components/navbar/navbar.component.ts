@@ -28,6 +28,7 @@ export class NavbarComponent {
   constructor(private readonly authService: AuthService, private readonly router: Router) {}
 
   logout() {
+    console.log('logout');
     this.authService.logout();
     this.router.navigate(['/login']);
   }
