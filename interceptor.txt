@@ -1,0 +1,49 @@
+Para quien este trabajando con la versión 17 de Angular, acá dejo como es que aplique este tema en dicha versión:
+
+token.interceptor.ts
+
+
+import { HttpContext, HttpContextToken, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { TokenService } from '../services/token.service';
+
+const CHECK_TOKEN = new HttpContextToken<boolean>(() => false);
+
+export function checkToken() {
+  return new HttpContext().set(CHECK_TOKEN, true);
+}
+
+export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.context.get(CHECK_TOKEN)) {
+    const tokenService = inject(TokenService);
+    const accessToken = tokenService.getToken();
+    if (accessToken) {
+      const authRequest = req.clone({
+        headers: req.headers.set('Authorization', `Bearer ${accessToken}`)
+      });
+      return next(authRequest);
+    }
+    return next(req);
+  }
+  return next(req);
+};
+app.config.ts
+
+
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { tokenInterceptor } from './interceptors/token.interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([tokenInterceptor])),]
+};
+Función getUsers() del archivo users.service.ts
+
+
+getUsers(){
+    return this.http.get<User[]>(`${this.apiUrl}/api/v1/users`, { context: checkToken() });
+  }
