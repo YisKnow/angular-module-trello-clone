@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { FormControl, Validators } from '@angular/forms';
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -9,10 +10,13 @@ import { Dialog } from '@angular/cdk/dialog';
 import { TodoDialogComponent } from '@boards/components/todo-dialog/todo-dialog.component';
 
 import { Card } from '@models/card.model';
-import { ToDo } from '@models/todo.model';
 import { Board } from '@models/board.model';
+import { List } from '@models/list.model';
+import { BACKGROUNDS } from '@models/colors.model';
 
 import { BoardsService } from '@services/boards.service';
+import { CardsService } from '@services/cards.service';
+import { ListService } from '@services/list.service';
 
 @Component({
   selector: 'app-board',
@@ -28,14 +32,26 @@ import { BoardsService } from '@services/boards.service';
     `,
   ],
 })
-export class BoardComponent implements OnInit {
+export class BoardComponent implements OnInit, OnDestroy {
   board: Board | null = null;
+  inputCard = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  inputList = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  showListForm = false;
+  colorBackgrounds = BACKGROUNDS;
 
-  todos: ToDo[] = [];
-  doing: ToDo[] = [];
-  done: ToDo[] = [];
-
-  constructor(private readonly dialog: Dialog, private readonly activatedRoute: ActivatedRoute, private readonly boardsService: BoardsService) {}
+  constructor(
+    private readonly dialog: Dialog,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly boardsService: BoardsService,
+    private readonly cardsService: CardsService,
+    private readonly listService: ListService
+  ) {}
 
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe((params) => {
@@ -44,6 +60,10 @@ export class BoardComponent implements OnInit {
         this.getBoard(boardId);
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.boardsService.backgroundColor$.next('sky');
   }
 
   drop(event: CdkDragDrop<Card[]>) {
@@ -61,13 +81,30 @@ export class BoardComponent implements OnInit {
         event.currentIndex
       );
     }
+
+    const rta = this.boardsService.getPosition(event.container.data, event.currentIndex);
+    const card = event.container.data[event.currentIndex];
+    const listId = event.container.id;
+    this.updateCard(card, rta, listId);
   }
 
-  addColumn() {
-    /* this.columns.push({
-      title: 'New Column',
-      todos: [],
-    }); */
+  addList() {
+    const title = this.inputList.value;
+
+    if (this.inputList.valid && this.board) {
+      this.listService.create({
+        title,
+        boardId: this.board.id,
+        position: this.boardsService.getPositionNewItem(this.board.lists),
+      }).subscribe((list) => {
+        this.board?.lists.push({
+          ...list,
+          cards: [],
+        });
+        this.inputList.setValue('');
+        this.showListForm = false;
+      });
+    }
   }
 
   openDialog(card: Card) {
@@ -87,5 +124,49 @@ export class BoardComponent implements OnInit {
     this.boardsService.getBoards(boardId).subscribe((board) => {
       this.board = board;
     });
+  }
+
+  private updateCard(card: Card, position: number, listId: string | number) {
+    this.cardsService.update(card.id, { position, listId }).subscribe((cardUpdate) => {
+      console.log('Card updated', cardUpdate);
+    });
+  }
+
+  openFormCard(list: List) {
+    if (this.board?.lists) {
+      this.board.lists = this.board.lists.map(iteratorList => ({
+        ...iteratorList,
+        showCardForm: iteratorList.id === list.id
+      }));
+    }
+  }
+
+  createCard(list: List) {
+    const title = this.inputCard.value;
+
+    if (this.board && this.inputCard.valid) {
+      this.cardsService.create({
+        title,
+        listId: list.id,
+        boardId: this.board?.id,
+        position: this.boardsService.getPositionNewItem(list.cards),
+      }).subscribe((card) => {
+        list.cards.push(card);
+        this.inputCard.setValue('');
+        list.showCardForm = false;
+      });
+    }
+  }
+
+  closeCardForm(list: List) {
+    list.showCardForm = false;
+  }
+
+  get colors() {
+    if (this.board) {
+      const classes = this.colorBackgrounds[this.board.backgroundColor] || {};
+      return classes;
+    }
+    return {};
   }
 }
