@@ -1,7 +1,6 @@
 @import '@material-symbols/font-400/outlined.css';
 
 /* You can add global styles to this file, and also import other style files */
-/*  ponytail: v4 replaces @tailwind directives with @import + @config + @plugin */
 @import 'tailwindcss';
 @config '../tailwind.config.js';
 @plugin '@tailwindcss/forms';
