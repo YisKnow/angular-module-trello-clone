@@ -9,7 +9,7 @@
         class="w-full rounded bg-gray-100 border-gray-300 border-2"
       />
       <button type="button" class="p-2 absolute right-2" (click)="form.email().focusBoundControl()">
-        <fa-icon [icon]="faPen"></fa-icon>
+        <span class="material-symbols-outlined">edit</span>
       </button>
     </div>
     @if (form.email().touched() && form.email().invalid()) {
@@ -36,7 +36,7 @@
         class="w-full rounded bg-gray-100 border-gray-300 border-2"
       />
       <button type="button" class="p-2 absolute right-2" (click)="showPassword = !showPassword">
-        <fa-icon [icon]="showPassword ? faEye : faEyeSlash"></fa-icon>
+        <span class="material-symbols-outlined">{{ showPassword ? 'visibility' : 'visibility_off' }}</span>
       </button>
     </div>
     @if (form.password().touched() && form.password().invalid()) {

@@ -2,14 +2,6 @@ import { Component, computed, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
-import {
-  faBell,
-  faInfoCircle,
-  faClose,
-  faAngleDown,
-} from '@fortawesome/free-solid-svg-icons';
 import { NAVBAR_BACKGROUNDS } from '@models/colors.model';
 
 import { AuthService } from '@services/auth.service';
@@ -24,18 +16,12 @@ import { BoardFormComponent } from '@layout/components/board-form/board-form.com
     RouterLink,
     NgClass,
     OverlayModule,
-    FontAwesomeModule,
     ButtonComponent,
     BoardFormComponent,
   ],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent {
-  faBell = faBell;
-  faInfoCircle = faInfoCircle;
-  faClose = faClose;
-  faAngleDown = faAngleDown;
-
   isOpenOverlayAvatar = false;
   isOpenOverlayBoards = false;
   isOpenOverlayCreateBoard = false;

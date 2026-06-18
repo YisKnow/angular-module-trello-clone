@@ -11,9 +11,6 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, catchError, exhaustMap, of, tap } from 'rxjs';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
-import { faPen, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import { RequestStatus } from '@models/request-status.model';
 
@@ -23,7 +20,7 @@ import { AuthService } from '@services/auth.service';
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [FormField, FormRoot, FontAwesomeModule, ButtonComponent],
+  imports: [FormField, FormRoot, ButtonComponent],
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
@@ -54,9 +51,6 @@ export class LoginFormComponent {
     { initialValue: null },
   );
 
-  faPen = faPen;
-  faEye = faEye;
-  faEyeSlash = faEyeSlash;
   showPassword = false;
   status: RequestStatus = 'init';
 

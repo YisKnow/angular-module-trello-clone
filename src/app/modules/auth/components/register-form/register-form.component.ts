@@ -4,9 +4,6 @@ import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, catchError, exhaustMap, of, tap } from 'rxjs';
 import { NgIf } from '@angular/common';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import { RequestStatus } from '@models/request-status.model';
 
@@ -20,7 +17,6 @@ import { CustomValidators } from '@utils/validators';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    FontAwesomeModule,
     NgIf,
     ButtonComponent,
   ],
@@ -104,8 +100,6 @@ export class RegisterFormComponent {
   );
   status: RequestStatus = 'init';
   statusUser: RequestStatus = 'init';
-  faEye = faEye;
-  faEyeSlash = faEyeSlash;
   showPassword = false;
   showRegister = false;
 

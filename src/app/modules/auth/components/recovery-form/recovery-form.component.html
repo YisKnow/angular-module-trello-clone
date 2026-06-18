@@ -13,7 +13,7 @@
         class="p-2 absolute right-2"
         (click)="showPassword = !showPassword"
       >
-        <fa-icon [icon]="showPassword ? faEye : faEyeSlash"></fa-icon>
+        <span class="material-symbols-outlined">{{ showPassword ? 'visibility' : 'visibility_off' }}</span>
       </button>
     </div>
     <div

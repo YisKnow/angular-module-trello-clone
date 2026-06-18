@@ -9,9 +9,6 @@ import {
 } from '@angular/forms/signals';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, catchError, exhaustMap, of, tap } from 'rxjs';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
 import { Colors } from '@models/colors.model';
 
@@ -23,13 +20,11 @@ type BoardFormModel = { title: string; backgroundColor: Colors };
 @Component({
   selector: 'app-board-form',
   standalone: true,
-  imports: [FormField, FormRoot, FontAwesomeModule, ButtonComponent],
+  imports: [FormField, FormRoot, ButtonComponent],
   templateUrl: './board-form.component.html',
 })
 export class BoardFormComponent {
   @Output() closeOverlay = new EventEmitter<boolean>();
-
-  faCheck = faCheck;
 
   private readonly boardsService = inject(BoardsService);
   private readonly router = inject(Router);
