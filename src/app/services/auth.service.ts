@@ -1,7 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { switchMap, tap } from 'rxjs';
+import { Observable, finalize, shareReplay, switchMap, tap } from 'rxjs';
 
 import { environment } from '@environments/environment';
 
@@ -19,9 +19,13 @@ export class AuthService {
   private readonly _user = signal<User | null>(null);
   readonly user = this._user.asReadonly();
 
+  // Slot for the current in-flight refresh. Cleared by finalize() so
+  // the next refresh starts a fresh network call.
+  private refresh$?: Observable<ResponseLogin>;
+
   constructor(
-    private readonly http: HttpClient,
-    private readonly tokenService: TokenService,
+    @Inject(HttpClient) private readonly http: HttpClient,
+    @Inject(TokenService) private readonly tokenService: TokenService,
   ) {}
 
   getDataUser() {
@@ -31,25 +35,49 @@ export class AuthService {
   login(email: string, password: string) {
     return this.http
       .post<ResponseLogin>(`${this.apiUrl}/api/v1/auth/login`, { email, password })
-      .pipe(
-        tap((response: ResponseLogin) => {
-          this.tokenService.saveToken(response.access_token);
-          this.tokenService.saveRefreshToken(response.refresh_token);
-        }),
-      );
+      .pipe(tap((response) => this.persistTokens(response)));
   }
 
+  // Public, low-level refresh used by tests and any caller that wants
+  // to trigger a refresh without involving the shared slot.
   refreshToken(refreshToken: string) {
     return this.http
       .post<ResponseLogin>(`${this.apiUrl}/api/v1/auth/refresh-token`, {
         refreshToken,
       })
+      .pipe(tap((response) => this.persistTokens(response)));
+  }
+
+  // Single-flight refresh. Concurrent callers receive the same
+  // observable; shareReplay replays the result to late subscribers
+  // and refCount: false keeps the source alive until completion so
+  // the network call is never duplicated. finalize clears the slot
+  // so the next refresh starts a new call.
+  refreshShare(): Observable<ResponseLogin> {
+    if (this.refresh$) {
+      return this.refresh$;
+    }
+    const refreshToken = this.tokenService.getRefreshToken();
+    if (!refreshToken || !this.tokenService.isValidRefreshToken()) {
+      throw new Error('No valid refresh token available');
+    }
+    this.refresh$ = this.http
+      .post<ResponseLogin>(`${this.apiUrl}/api/v1/auth/refresh-token`, {
+        refreshToken,
+      })
       .pipe(
-        tap((response: ResponseLogin) => {
-          this.tokenService.saveToken(response.access_token);
-          this.tokenService.saveRefreshToken(response.refresh_token);
+        tap((response) => this.persistTokens(response)),
+        shareReplay({ bufferSize: 1, refCount: false }),
+        finalize(() => {
+          this.refresh$ = undefined;
         }),
       );
+    return this.refresh$;
+  }
+
+  private persistTokens(response: ResponseLogin) {
+    this.tokenService.saveToken(response.access_token);
+    this.tokenService.saveRefreshToken(response.refresh_token);
   }
 
   register(name: string, email: string, password: string) {
@@ -94,5 +122,6 @@ export class AuthService {
     this.tokenService.removeToken();
     this.tokenService.removeRefreshToken();
     this._user.set(null);
+    this.refresh$ = undefined;
   }
 }
