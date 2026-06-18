@@ -19,8 +19,6 @@ export class ButtonComponent {
 
   mapColors = COLORS;
 
-  constructor() {}
-
   get colors() {
     const colors = this.mapColors[this.color];
     if (colors) {

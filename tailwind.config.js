@@ -1,11 +1,9 @@
 /** @type {import('tailwindcss').Config} */
+// ponytail: v4 ignores content (auto-scanned) and plugins (loaded via @plugin in CSS)
 
 const colors = require('tailwindcss/colors');
 
 module.exports = {
-  content: [
-    "./src/**/*.{html,ts}",
-  ],
   theme: {
     extend: {
       colors: {
@@ -24,7 +22,4 @@ module.exports = {
       }
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
 }

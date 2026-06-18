@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+// ponytail: v4 replaces @tailwind directives with @import + @config + @plugin
+@import 'tailwindcss';
+@config '../tailwind.config.js';
+@plugin '@tailwindcss/forms';
 
 @import '@angular/cdk/overlay-prebuilt.css';
