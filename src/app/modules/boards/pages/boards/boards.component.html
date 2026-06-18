@@ -59,11 +59,15 @@
   <div class="w-full">
     <h1 class="text-lg font-bold mb-4"><fa-icon [icon]="faClock"></fa-icon> Recently viewed</h1>
     <div class="grid grid-cols-4 gap-4">
-      <a *ngFor="let board of boards" [routerLink]="['/app/boards', board.id]"  >
-        <app-card-color [color]="board.backgroundColor">
-          {{ board.title }}
-        </app-card-color>
-      </a>
+      @for (board of boards.value(); track board.id) {
+        <a [routerLink]="['/app/boards', board.id]">
+          <app-card-color [color]="board.backgroundColor">
+            {{ board.title }}
+          </app-card-color>
+        </a>
+      } @empty {
+        <p class="text-sm text-gray-500">No boards yet. Create one to get started.</p>
+      }
     </div>
   </div>
 </div>

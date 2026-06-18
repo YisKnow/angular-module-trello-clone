@@ -1,16 +1,10 @@
 import { defineConfig } from 'vitest/config';
-import angular from '@analogjs/vite-plugin-angular';
 
+// ponytail: no Angular plugin needed — testing plain services, not components
 export default defineConfig({
-  plugins: [angular()],
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['src/test-setup.ts'],
     include: ['src/**/*.spec.ts'],
-    reporters: ['default']
   },
-  resolve: {
-    mainFields: ['module']
-  }
 });

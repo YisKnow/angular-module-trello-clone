@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import {
   faClose,
@@ -13,6 +14,8 @@ import {
 
 import { Card } from '@models/card.model';
 
+import { ButtonComponent } from '@shared/components/button/button.component';
+
 interface InputData {
   card: Card;
 }
@@ -23,7 +26,8 @@ interface OutputData {
 
 @Component({
   selector: 'app-todo-dialog',
-  standalone: false,
+  standalone: true,
+  imports: [FontAwesomeModule, ButtonComponent],
   templateUrl: './todo-dialog.component.html',
 })
 export class TodoDialogComponent {
@@ -39,7 +43,7 @@ export class TodoDialogComponent {
 
   constructor(
     private readonly dialogRef: DialogRef<OutputData>,
-    @Inject(DIALOG_DATA) data: InputData
+    @Inject(DIALOG_DATA) data: InputData,
   ) {
     this.card = data.card;
   }

@@ -36,6 +36,12 @@
       "@boards/*": [
         "./src/app/modules/boards/*"
       ],
+      "@layout/*": [
+        "./src/app/modules/layout/*"
+      ],
+      "@modules/*": [
+        "./src/app/modules/*"
+      ],
       "@environments/*": [
         "./src/environments/*"
       ],

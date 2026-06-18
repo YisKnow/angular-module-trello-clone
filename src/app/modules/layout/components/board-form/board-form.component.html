@@ -1,13 +1,12 @@
-<form [formGroup]="form" novalidate class="space-y-4" (ngSubmit)="doSave()">
+<form [formRoot]="form" class="space-y-4">
   <div>
     <div class="flex flex-wrap gap-3">
       <div class="flex items-center">
         <input
           id="sky-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="sky"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="sky-radio-label"
         />
@@ -24,9 +23,8 @@
         <input
           id="yellow-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="yellow"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="yellow-radio-label"
         />
@@ -43,9 +41,8 @@
         <input
           id="red-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="red"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="red-radio-label"
         />
@@ -62,9 +59,8 @@
         <input
           id="violet-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="violet"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="violet-radio-label"
         />
@@ -81,9 +77,8 @@
         <input
           id="gray-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="gray"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="gray-radio-label"
         />
@@ -100,9 +95,8 @@
         <input
           id="green-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="green"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="green-radio-label"
         />
@@ -120,7 +114,7 @@
   <div>
     <div class="relative">
       <input
-        formControlName="title"
+        [formField]="form.title"
         placeholder="Enter title"
         type="text"
         class="w-full rounded bg-gray-100 border-gray-300 border-2"

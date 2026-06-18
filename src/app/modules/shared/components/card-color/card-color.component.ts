@@ -1,10 +1,12 @@
 import { Component, Input } from '@angular/core';
+import { NgClass } from '@angular/common';
 
 import { COLORS, Colors } from '@models/colors.model';
 
 @Component({
   selector: 'app-card-color',
-  standalone: false,
+  standalone: true,
+  imports: [NgClass],
   templateUrl: './card-color.component.html',
   styles: [
   ]

@@ -1,10 +1,13 @@
 import { Component, Input } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { COLORS, Colors } from '@models/colors.model';
 
 @Component({
   selector: 'app-btn',
-  standalone: false,
+  standalone: true,
+  imports: [FontAwesomeModule, NgClass],
   templateUrl: './button.component.html',
 })
 export class ButtonComponent {

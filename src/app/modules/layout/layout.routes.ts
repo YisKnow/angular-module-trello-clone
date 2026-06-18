@@ -1,11 +1,9 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { authGuard } from '@guards/auth.guard';
-
 import { LayoutComponent } from './components/layout/layout.component';
 
-const routes: Routes = [
+export const LAYOUT_ROUTES: Routes = [
   {
     path: '',
     component: LayoutComponent,
@@ -13,32 +11,28 @@ const routes: Routes = [
       {
         path: '',
         redirectTo: 'boards',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       {
         path: 'boards',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('../boards/boards.module').then((m) => m.BoardsModule),
+          import('@boards/boards.routes').then((m) => m.BOARDS_ROUTES),
       },
       {
         path: 'profile',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('../profile/profile.module').then((m) => m.ProfileModule),
+          import('@modules/profile/profile.routes').then(
+            (m) => m.PROFILE_ROUTES,
+          ),
       },
       {
         path: 'users',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('../users/users.module').then((m) => m.UsersModule),
+          import('@modules/users/users.routes').then((m) => m.USERS_ROUTES),
       },
     ],
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class LayoutRoutingModule {}

@@ -1,16 +1,29 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, Validators, FormControl } from '@angular/forms';
+import {
+  form,
+  schema,
+  required,
+  FormField,
+  FormRoot,
+} from '@angular/forms/signals';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subject, catchError, exhaustMap, of, tap } from 'rxjs';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
 import { Colors } from '@models/colors.model';
 
 import { BoardsService } from '@services/boards.service';
+import { ButtonComponent } from '@shared/components/button/button.component';
+
+type BoardFormModel = { title: string; backgroundColor: Colors };
 
 @Component({
   selector: 'app-board-form',
-  standalone: false,
+  standalone: true,
+  imports: [FormField, FormRoot, FontAwesomeModule, ButtonComponent],
   templateUrl: './board-form.component.html',
 })
 export class BoardFormComponent {
@@ -18,25 +31,43 @@ export class BoardFormComponent {
 
   faCheck = faCheck;
 
-  form = this.formBuilder.nonNullable.group({
-    title: ['', [Validators.required]],
-    backgroundColor: new FormControl<Colors>('sky', { nonNullable: true, validators: [Validators.required] }),
-  });
+  private readonly boardsService = inject(BoardsService);
+  private readonly router = inject(Router);
 
-  constructor(private readonly formBuilder: FormBuilder, private readonly boardsService: BoardsService, private readonly router: Router) { }
+  private readonly createBoardSubject = new Subject<{
+    title: string;
+    backgroundColor: Colors;
+  }>();
 
-  doSave() {
-    if (this.form.valid) {
-      const { title, backgroundColor } = this.form.getRawValue();
+  readonly createBoardResult = toSignal(
+    this.createBoardSubject.pipe(
+      exhaustMap(({ title, backgroundColor }) =>
+        this.boardsService.createBoard(title, backgroundColor).pipe(
+          tap({
+            next: (board) => {
+              this.closeOverlay.emit(false);
+              this.router.navigate(['/app/boards', board.id]);
+            },
+          }),
+          catchError(() => of(null)),
+        ),
+      ),
+    ),
+    { initialValue: null },
+  );
 
-      this.boardsService.createBoard(title, backgroundColor).subscribe({
-        next: (board) => {
-          this.closeOverlay.emit(false);
-          this.router.navigate(['/app/boards', board.id]);
-        }
-      });
-    } else {
-      this.form.markAllAsTouched();
-    }
-  }
+  readonly form = form(
+    signal<BoardFormModel>({ title: '', backgroundColor: 'sky' }),
+    schema((path) => {
+      required(path.title);
+      required(path.backgroundColor);
+    }),
+    {
+      submission: {
+        action: async () => {
+          this.createBoardSubject.next(this.form().value());
+        },
+      },
+    },
+  );
 }
