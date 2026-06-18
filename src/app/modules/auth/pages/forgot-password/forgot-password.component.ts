@@ -19,5 +19,4 @@ import { BackgroundComponent } from '@auth/components/background/background.comp
   templateUrl: './forgot-password.component.html',
 })
 export class ForgotPasswordComponent {
-  constructor() {}
 }

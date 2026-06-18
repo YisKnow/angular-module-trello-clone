@@ -19,5 +19,4 @@ import { BackgroundComponent } from '@auth/components/background/background.comp
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {
-  constructor() {}
 }

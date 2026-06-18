@@ -19,5 +19,4 @@ import { BackgroundComponent } from '@auth/components/background/background.comp
   templateUrl: './recovery.component.html',
 })
 export class RecoveryComponent {
-  constructor() {}
 }

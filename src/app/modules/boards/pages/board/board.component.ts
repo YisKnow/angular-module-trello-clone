@@ -162,9 +162,6 @@ export class BoardComponent implements OnDestroy {
       this.cardUpdate$.pipe(
         exhaustMap(({ card, position, listId }) =>
           this.cardsService.update(card.id, { position, listId }).pipe(
-            tap((cardUpdate) => {
-              console.log('Card updated', cardUpdate);
-            }),
             catchError(() => of(null)),
           ),
         ),

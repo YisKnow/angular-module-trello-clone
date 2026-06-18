@@ -8,8 +8,6 @@ import { jwtDecode, JwtPayload } from 'jwt-decode';
 })
 export class TokenService {
 
-  constructor() { }
-
   saveToken(token: string) {
     setCookie('token-trello', token, { expires: 365, path: '/' });
   }

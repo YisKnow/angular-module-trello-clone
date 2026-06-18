@@ -8,8 +8,6 @@ import { COLORS, Colors } from '@models/colors.model';
   standalone: true,
   imports: [NgClass],
   templateUrl: './card-color.component.html',
-  styles: [
-  ]
 })
 export class CardColorComponent {
   @Input() color: Colors = 'sky';
