@@ -56,9 +56,7 @@
   </div>
   @if (status === 'failed') {
     <div>
-      <p class="font-medium text-red-500 text-xs mt-1 ml-1">
-        Credentials are invalid
-      </p>
+      <p class="font-medium text-red-500 text-xs mt-1 ml-1">{{ errorMessage }}</p>
     </div>
   }
   <div>

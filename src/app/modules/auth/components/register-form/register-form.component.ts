@@ -41,10 +41,13 @@ export class RegisterFormComponent {
           tap({
             next: () => {
               this.status = 'success';
+              this.errorMessage = '';
               this.router.navigate(['/app/boards']);
             },
-            error: () => {
+            error: (err) => {
               this.status = 'failed';
+              this.errorMessage =
+                err?.error?.message || 'Registration failed. Please try again.';
             },
           }),
           catchError(() => of(null)),
@@ -100,6 +103,7 @@ export class RegisterFormComponent {
   );
   status: RequestStatus = 'init';
   statusUser: RequestStatus = 'init';
+  errorMessage = '';
   showPassword = false;
   showRegister = false;
 
