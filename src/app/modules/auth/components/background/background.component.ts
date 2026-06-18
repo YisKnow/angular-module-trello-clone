@@ -1,14 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
+// ponytail: no OnInit needed — component doesn't initialize state
 @Component({
   selector: 'app-background',
+  standalone: true,
   templateUrl: './background.component.html',
 })
-export class BackgroundComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
-}
+export class BackgroundComponent {}

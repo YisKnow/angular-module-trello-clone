@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   HttpRequest,
-  HttpHandler,
+  HttpHandlerFn,
   HttpEvent,
-  HttpInterceptor,
+  HttpInterceptorFn,
   HttpContextToken,
   HttpContext
 } from '@angular/common/http';
@@ -19,42 +19,51 @@ export function checkToken() {
   return new HttpContext().set(CHECK_TOKEN, true);
 }
 
-@Injectable()
-export class TokenInterceptor implements HttpInterceptor {
+export const tokenInterceptor: HttpInterceptorFn = (
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
+  const tokenService = inject(TokenService);
+  const authService = inject(AuthService);
 
-  constructor(private readonly tokenService: TokenService, private readonly authService: AuthService) {}
-
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if (request.context.get(CHECK_TOKEN)) {
-      const isValidToken = this.tokenService.isValidToken(); // accessToken
-      if (isValidToken) {
-        return this.addToken(request, next);
-      } else {
-        return this.updateAccessTokenAndRefreshToken(request, next);
-      }
+  if (request.context.get(CHECK_TOKEN)) {
+    const isValidToken = tokenService.isValidToken();
+    if (isValidToken) {
+      return addToken(request, next, tokenService);
+    } else {
+      return updateAccessTokenAndRefreshToken(request, next, tokenService, authService);
     }
-    return next.handle(request);
   }
+  return next(request);
+};
 
-  private addToken(request: HttpRequest<unknown>, next: HttpHandler) {
-    const accessToken = this.tokenService.getToken();
-    if (accessToken) {
-      const authRequest = request.clone({
-        headers: request.headers.set('Authorization', `Bearer ${accessToken}`)
-      });
-      return next.handle(authRequest);
-    }
-    return next.handle(request);
+function addToken(
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  tokenService: TokenService
+): Observable<HttpEvent<unknown>> {
+  const accessToken = tokenService.getToken();
+  if (accessToken) {
+    const authRequest = request.clone({
+      headers: request.headers.set('Authorization', `Bearer ${accessToken}`)
+    });
+    return next(authRequest);
   }
+  return next(request);
+}
 
-  private updateAccessTokenAndRefreshToken(request: HttpRequest<unknown>, next: HttpHandler) {
-    const refreshToken = this.tokenService.getRefreshToken();
-    const isValidRefreshToken = this.tokenService.isValidRefreshToken();
-    if (refreshToken && isValidRefreshToken) {
-      return this.authService.refreshToken(refreshToken).pipe(
-        switchMap(() => this.addToken(request, next))
-      );
-    }
-    return next.handle(request);
+function updateAccessTokenAndRefreshToken(
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  tokenService: TokenService,
+  authService: AuthService
+): Observable<HttpEvent<unknown>> {
+  const refreshToken = tokenService.getRefreshToken();
+  const isValidRefreshToken = tokenService.isValidRefreshToken();
+  if (refreshToken && isValidRefreshToken) {
+    return authService.refreshToken(refreshToken).pipe(
+      switchMap(() => addToken(request, next, tokenService))
+    );
   }
+  return next(request);
 }

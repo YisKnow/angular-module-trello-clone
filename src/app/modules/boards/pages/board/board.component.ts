@@ -1,25 +1,49 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FormControl, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  FormControl,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { NgClass } from '@angular/common';
 import {
   CdkDragDrop,
+  DragDropModule,
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
-import { Dialog } from '@angular/cdk/dialog';
-import { TodoDialogComponent } from '@boards/components/todo-dialog/todo-dialog.component';
+import { Dialog, DialogModule } from '@angular/cdk/dialog';
+import {
+  Subject,
+  catchError,
+  exhaustMap,
+  firstValueFrom,
+  of,
+  tap,
+} from 'rxjs';
 
 import { Card } from '@models/card.model';
 import { Board } from '@models/board.model';
 import { List } from '@models/list.model';
 import { BACKGROUNDS } from '@models/colors.model';
 
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { TodoDialogComponent } from '@boards/components/todo-dialog/todo-dialog.component';
 import { BoardsService } from '@services/boards.service';
 import { CardsService } from '@services/cards.service';
 import { ListService } from '@services/list.service';
 
 @Component({
   selector: 'app-board',
+  standalone: true,
+  imports: [
+    NgClass,
+    ReactiveFormsModule,
+    DragDropModule,
+    DialogModule,
+    ButtonComponent,
+  ],
   templateUrl: './board.component.html',
   styles: [
     `
@@ -32,8 +56,24 @@ import { ListService } from '@services/list.service';
     `,
   ],
 })
-export class BoardComponent implements OnInit, OnDestroy {
-  board: Board | null = null;
+export class BoardComponent implements OnDestroy {
+  private readonly dialog = inject(Dialog);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly boardsService = inject(BoardsService);
+  private readonly cardsService = inject(CardsService);
+  private readonly listService = inject(ListService);
+
+  private readonly paramMap = toSignal(this.activatedRoute.paramMap);
+  private readonly listAdd$ = new Subject<void>();
+  private readonly cardAdd$ = new Subject<List>();
+  private readonly cardUpdate$ = new Subject<{
+    card: Card;
+    position: number;
+    listId: string | number;
+  }>();
+
+  readonly board = signal<Board | null>(null);
+
   inputCard = new FormControl<string>('', {
     nonNullable: true,
     validators: [Validators.required],
@@ -45,25 +85,93 @@ export class BoardComponent implements OnInit, OnDestroy {
   showListForm = false;
   colorBackgrounds = BACKGROUNDS;
 
-  constructor(
-    private readonly dialog: Dialog,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly boardsService: BoardsService,
-    private readonly cardsService: CardsService,
-    private readonly listService: ListService
-  ) {}
-
-  ngOnInit() {
-    this.activatedRoute.paramMap.subscribe((params) => {
-      const boardId = params.get('boardId');
-      if (boardId) {
-        this.getBoard(boardId);
-      }
+  constructor() {
+    // React to paramMap changes and load the board
+    effect(() => {
+      const pm = this.paramMap();
+      const boardId = pm?.get('boardId');
+      if (!boardId) return;
+      void this.loadBoard(boardId);
     });
+
+    // Add list to current board
+    toSignal(
+      this.listAdd$.pipe(
+        exhaustMap(() => {
+          const title = this.inputList.value;
+          if (this.inputList.valid && this.board()) {
+            return this.listService
+              .create({
+                title,
+                boardId: this.board()!.id,
+                position: this.boardsService.getPositionNewItem(
+                  this.board()!.lists,
+                ),
+              })
+              .pipe(
+                tap((list) => {
+                  const current = this.board();
+                  if (current) {
+                    this.board.set({
+                      ...current,
+                      lists: [...current.lists, { ...list, cards: [] }],
+                    });
+                  }
+                  this.inputList.setValue('');
+                  this.showListForm = false;
+                }),
+                catchError(() => of(null)),
+              );
+          }
+          return of(null);
+        }),
+      ),
+      { initialValue: null },
+    );
+
+    // Create a new card in a list
+    toSignal(
+      this.cardAdd$.pipe(
+        exhaustMap((list) => {
+          const title = this.inputCard.value;
+          if (this.board() && this.inputCard.valid) {
+            return this.cardsService
+              .create({
+                title,
+                listId: list.id,
+                boardId: this.board()!.id,
+                position: this.boardsService.getPositionNewItem(list.cards),
+              })
+              .pipe(
+                tap((card) => {
+                  list.cards.push(card);
+                  this.inputCard.setValue('');
+                  list.showCardForm = false;
+                }),
+                catchError(() => of(null)),
+              );
+          }
+          return of(null);
+        }),
+      ),
+      { initialValue: null },
+    );
+
+    // Update a card's position
+    toSignal(
+      this.cardUpdate$.pipe(
+        exhaustMap(({ card, position, listId }) =>
+          this.cardsService.update(card.id, { position, listId }).pipe(
+            catchError(() => of(null)),
+          ),
+        ),
+      ),
+      { initialValue: null },
+    );
   }
 
   ngOnDestroy() {
-    this.boardsService.backgroundColor$.next('sky');
+    this.boardsService.setBackgroundColor('sky');
   }
 
   drop(event: CdkDragDrop<Card[]>) {
@@ -71,43 +179,31 @@ export class BoardComponent implements OnInit, OnDestroy {
       moveItemInArray(
         event.container.data,
         event.previousIndex,
-        event.currentIndex
+        event.currentIndex,
       );
     } else {
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
-        event.currentIndex
+        event.currentIndex,
       );
     }
 
-    const rta = this.boardsService.getPosition(event.container.data, event.currentIndex);
+    const rta = this.boardsService.getPosition(
+      event.container.data,
+      event.currentIndex,
+    );
     const card = event.container.data[event.currentIndex];
     const listId = event.container.id;
-    this.updateCard(card, rta, listId);
+    this.cardUpdate$.next({ card, position: rta, listId });
   }
 
   addList() {
-    const title = this.inputList.value;
-
-    if (this.inputList.valid && this.board) {
-      this.listService.create({
-        title,
-        boardId: this.board.id,
-        position: this.boardsService.getPositionNewItem(this.board.lists),
-      }).subscribe((list) => {
-        this.board?.lists.push({
-          ...list,
-          cards: [],
-        });
-        this.inputList.setValue('');
-        this.showListForm = false;
-      });
-    }
+    this.listAdd$.next();
   }
 
-  openDialog(card: Card) {
+  async openDialog(card: Card) {
     const dialogRef = this.dialog.open(TodoDialogComponent, {
       minWidth: '300px',
       maxWidth: '50%',
@@ -115,47 +211,29 @@ export class BoardComponent implements OnInit, OnDestroy {
         card,
       },
     });
-    dialogRef.closed.subscribe((output) => {
+    try {
+      const output = await firstValueFrom(dialogRef.closed);
       console.log(output);
-    });
-  }
-
-  private getBoard(boardId: string) {
-    this.boardsService.getBoards(boardId).subscribe((board) => {
-      this.board = board;
-    });
-  }
-
-  private updateCard(card: Card, position: number, listId: string | number) {
-    this.cardsService.update(card.id, { position, listId }).subscribe((cardUpdate) => {
-      console.log('Card updated', cardUpdate);
-    });
+    } catch {
+      /* dialog dismissed without data */
+    }
   }
 
   openFormCard(list: List) {
-    if (this.board?.lists) {
-      this.board.lists = this.board.lists.map(iteratorList => ({
-        ...iteratorList,
-        showCardForm: iteratorList.id === list.id
-      }));
+    const current = this.board();
+    if (current?.lists) {
+      this.board.set({
+        ...current,
+        lists: current.lists.map((iteratorList) => ({
+          ...iteratorList,
+          showCardForm: iteratorList.id === list.id,
+        })),
+      });
     }
   }
 
   createCard(list: List) {
-    const title = this.inputCard.value;
-
-    if (this.board && this.inputCard.valid) {
-      this.cardsService.create({
-        title,
-        listId: list.id,
-        boardId: this.board?.id,
-        position: this.boardsService.getPositionNewItem(list.cards),
-      }).subscribe((card) => {
-        list.cards.push(card);
-        this.inputCard.setValue('');
-        list.showCardForm = false;
-      });
-    }
+    this.cardAdd$.next(list);
   }
 
   closeCardForm(list: List) {
@@ -163,10 +241,22 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   get colors() {
-    if (this.board) {
-      const classes = this.colorBackgrounds[this.board.backgroundColor] || {};
+    const current = this.board();
+    if (current) {
+      const classes = this.colorBackgrounds[current.backgroundColor] || {};
       return classes;
     }
     return {};
+  }
+
+  private async loadBoard(boardId: string) {
+    try {
+      const board = await firstValueFrom(
+        this.boardsService.getBoards(boardId),
+      );
+      this.board.set(board);
+    } catch (err) {
+      console.error('Failed to load board', err);
+    }
   }
 }

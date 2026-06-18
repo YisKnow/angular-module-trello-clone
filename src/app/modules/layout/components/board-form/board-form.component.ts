@@ -1,41 +1,68 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, Validators, FormControl } from '@angular/forms';
-
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import {
+  form,
+  schema,
+  required,
+  FormField,
+  FormRoot,
+} from '@angular/forms/signals';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subject, catchError, exhaustMap, of, tap } from 'rxjs';
 
 import { Colors } from '@models/colors.model';
 
 import { BoardsService } from '@services/boards.service';
+import { ButtonComponent } from '@shared/components/button/button.component';
+
+type BoardFormModel = { title: string; backgroundColor: Colors };
 
 @Component({
   selector: 'app-board-form',
+  standalone: true,
+  imports: [FormField, FormRoot, ButtonComponent],
   templateUrl: './board-form.component.html',
 })
 export class BoardFormComponent {
   @Output() closeOverlay = new EventEmitter<boolean>();
 
-  faCheck = faCheck;
+  private readonly boardsService = inject(BoardsService);
+  private readonly router = inject(Router);
 
-  form = this.formBuilder.nonNullable.group({
-    title: ['', [Validators.required]],
-    backgroundColor: new FormControl<Colors>('sky', { nonNullable: true, validators: [Validators.required] }),
-  });
+  private readonly createBoardSubject = new Subject<{
+    title: string;
+    backgroundColor: Colors;
+  }>();
 
-  constructor(private readonly formBuilder: FormBuilder, private readonly boardsService: BoardsService, private readonly router: Router) { }
+  readonly createBoardResult = toSignal(
+    this.createBoardSubject.pipe(
+      exhaustMap(({ title, backgroundColor }) =>
+        this.boardsService.createBoard(title, backgroundColor).pipe(
+          tap({
+            next: (board) => {
+              this.closeOverlay.emit(false);
+              this.router.navigate(['/app/boards', board.id]);
+            },
+          }),
+          catchError(() => of(null)),
+        ),
+      ),
+    ),
+    { initialValue: null },
+  );
 
-  doSave() {
-    if (this.form.valid) {
-      const { title, backgroundColor } = this.form.getRawValue();
-
-      this.boardsService.createBoard(title, backgroundColor).subscribe({
-        next: (board) => {
-          this.closeOverlay.emit(false);
-          this.router.navigate(['/app/boards', board.id]);
-        }
-      });
-    } else {
-      this.form.markAllAsTouched();
-    }
-  }
+  readonly form = form(
+    signal<BoardFormModel>({ title: '', backgroundColor: 'sky' }),
+    schema((path) => {
+      required(path.title);
+      required(path.backgroundColor);
+    }),
+    {
+      submission: {
+        action: async () => {
+          this.createBoardSubject.next(this.form().value());
+        },
+      },
+    },
+  );
 }

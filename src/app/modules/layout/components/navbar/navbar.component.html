@@ -1,5 +1,5 @@
-<ng-container *ngIf="user$ | async as user">
-  <nav class="bg-sky-700 border-gray-200 px-6 shadow-md" [ngClass]="colors">
+@if (user(); as user) {
+  <nav class="bg-sky-700 border-gray-200 px-6 shadow-md" [ngClass]="colors()">
     <div class="flex flex-wrap justify-between items-center">
       <div class="flex items-center">
         <a routerLink="/app">
@@ -14,14 +14,14 @@
           <ul class="flex items-center space-x-2 text-sm font-medium">
             <li>
               <app-btn
-                [color]="navBarBackgroundColor"
+                [color]="navBarBackgroundColor()"
                 (click)="isOpenOverlayBoards = !isOpenOverlayBoards"
                 cdkOverlayOrigin
                 #boardsOverlay="cdkOverlayOrigin"
               >
                 <span class="flex space-x-2 text-left">
                   <span>Boards</span>
-                  <fa-icon [icon]="faAngleDown"></fa-icon>
+                  <span class="material-symbols-outlined">keyboard_arrow_down</span>
                 </span>
               </app-btn>
             </li>
@@ -31,14 +31,14 @@
             <li>
               <app-btn
                 typeBtn="button"
-                [color]="navBarBackgroundColor"
+                [color]="navBarBackgroundColor()"
                 cdkOverlayOrigin
                 #createBoardOverlay="cdkOverlayOrigin"
                 (click)="isOpenOverlayCreateBoard = !isOpenOverlayCreateBoard"
               >
                 <div class="flex space-x-2 text-left">
                   <span>Create</span>
-                  <fa-icon [icon]="faAngleDown"></fa-icon>
+                  <span class="material-symbols-outlined">keyboard_arrow_down</span>
                 </div>
               </app-btn>
             </li>
@@ -48,10 +48,10 @@
       <div class="flex items-center">
         <div class="flex space-x-2">
           <button class="text-white" type="button">
-            <fa-icon [icon]="faBell"></fa-icon>
+            <span class="material-symbols-outlined">notifications</span>
           </button>
           <button class="text-white" type="button">
-            <fa-icon [icon]="faInfoCircle"></fa-icon>
+            <span class="material-symbols-outlined">info</span>
           </button>
           <button
             type="button"
@@ -88,7 +88,7 @@
           (click)="isOpenOverlayAvatar = !isOpenOverlayAvatar"
           class="block text-sm text-gray-900 absolute right-3 top-3"
         >
-          <fa-icon [icon]="faClose"></fa-icon>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
       <div class="py-3 px-4 flex items-center space-x-4">
@@ -152,7 +152,7 @@
           (click)="isOpenOverlayBoards = !isOpenOverlayBoards"
           class="block text-sm text-gray-900 absolute right-3 top-3"
         >
-          <fa-icon [icon]="faClose"></fa-icon>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
       <div class="py-3 px-4 flex justify-between">Content</div>
@@ -174,12 +174,16 @@
           (click)="isOpenOverlayCreateBoard = !isOpenOverlayCreateBoard"
           class="block text-sm text-gray-900 absolute right-3 top-3"
         >
-          <fa-icon [icon]="faClose"></fa-icon>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
       <div class="py-3 px-4 flex justify-between">
-        <app-board-form (closeOverlay)="close($event)"></app-board-form>
+        @defer (on interaction(createBoardOverlay); prefetch on idle) {
+          <app-board-form (closeOverlay)="close($event)"></app-board-form>
+        } @placeholder {
+          <span class="text-xs text-gray-400">Create board form loads on first click</span>
+        }
       </div>
     </div>
   </ng-template>
-</ng-container>
+}

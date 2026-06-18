@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-
-import { DataSourceUser } from './data-source';
+import { Component, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { CdkTableModule } from '@angular/cdk/table';
 
 import { User } from '@models/user.model';
 
@@ -9,26 +9,21 @@ import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-users-table',
-  templateUrl: './users-table.component.html'
+  standalone: true,
+  imports: [CdkTableModule],
+  templateUrl: './users-table.component.html',
 })
-export class UsersTableComponent implements OnInit  {
-  dataSource = new DataSourceUser();
+export class UsersTableComponent {
+  private readonly usersService = inject(UsersService);
+  readonly authService = inject(AuthService);
+
   columns: string[] = ['id', 'avatar', 'name', 'email'];
 
-  user: User | null = null;
+  // ponytail: rxResource replaces Subject+switchMap+toSignal, keeps service layer
+  readonly users = rxResource({
+    stream: () => this.usersService.getUsers(),
+    defaultValue: [] as User[],
+  });
 
-  constructor(private readonly usersService: UsersService, private readonly authService: AuthService) {}
-
-  ngOnInit() {
-    this.getUsers();
-    this.authService.user$.subscribe((user) => {
-      this.user = user;
-    });
-  }
-
-  getUsers() {
-    this.usersService.getUsers().subscribe((users) => {
-      this.dataSource.init(users);
-    });
-  }
+  readonly user = this.authService.user;
 }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
-import { BehaviorSubject, tap } from 'rxjs';
+import { tap } from 'rxjs';
 
 import { environment } from '@environments/environment';
 
@@ -13,24 +13,28 @@ import { Colors } from '@models/colors.model';
 import { List } from '@models/list.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BoardsService {
   apiUrl = environment.API_URL;
   bufferSpace = 65535;
-  backgroundColor$ = new BehaviorSubject<Colors>('sky');
+  private readonly _backgroundColor = signal<Colors>('sky');
+  readonly backgroundColor = this._backgroundColor.asReadonly();
 
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   getBoards(id: Board['id']) {
-    return this.http.get<Board>(`${this.apiUrl}/api/v1/boards/${id}`, { context: checkToken() })
-    .pipe(
-      tap(board => this.setBackgroundColor(board.backgroundColor))
-    );
+    return this.http
+      .get<Board>(`${this.apiUrl}/api/v1/boards/${id}`, { context: checkToken() })
+      .pipe(tap((board) => this.setBackgroundColor(board.backgroundColor)));
   }
 
   createBoard(title: string, backgroundColor: Colors) {
-    return this.http.post<Board>(`${this.apiUrl}/api/v1/boards`, { title, backgroundColor }, { context: checkToken() });
+    return this.http.post<Board>(
+      `${this.apiUrl}/api/v1/boards`,
+      { title, backgroundColor },
+      { context: checkToken() },
+    );
   }
 
   getPosition(cards: Card[], currentIndex: number) {
@@ -69,7 +73,6 @@ export class BoardsService {
   }
 
   setBackgroundColor(color: Colors) {
-    this.backgroundColor$.next(color);
+    this._backgroundColor.set(color);
   }
-
 }

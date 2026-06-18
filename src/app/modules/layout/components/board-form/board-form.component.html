@@ -1,13 +1,12 @@
-<form [formGroup]="form" novalidate class="space-y-4" (ngSubmit)="doSave()">
+<form [formRoot]="form" class="space-y-4">
   <div>
     <div class="flex flex-wrap gap-3">
       <div class="flex items-center">
         <input
           id="sky-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="sky"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="sky-radio-label"
         />
@@ -16,7 +15,7 @@
           for="sky-radio"
           class="inline-flex items-center justify-center w-8 h-8 text-transparent border border-gray-200 rounded cursor-pointer bg-sky-700 hover:bg-sky-500 peer-checked:text-white"
           >
-          <fa-icon [icon]="faCheck"></fa-icon>
+          <span class="material-symbols-outlined">check</span>
           <span class="sr-only">Sky</span>
         </label>
       </div>
@@ -24,9 +23,8 @@
         <input
           id="yellow-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="yellow"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="yellow-radio-label"
         />
@@ -35,7 +33,7 @@
           for="yellow-radio"
           class="inline-flex items-center justify-center w-8 h-8 text-transparent border border-gray-200 rounded cursor-pointer bg-yellow-700 hover:bg-yellow-500 peer-checked:text-white"
           >
-          <fa-icon [icon]="faCheck"></fa-icon>
+          <span class="material-symbols-outlined">check</span>
           <span class="sr-only">Yellow</span>
         </label>
       </div>
@@ -43,9 +41,8 @@
         <input
           id="red-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="red"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="red-radio-label"
         />
@@ -54,7 +51,7 @@
           for="red-radio"
           class="inline-flex items-center justify-center w-8 h-8 text-transparent border border-gray-200 rounded cursor-pointer bg-red-700 hover:bg-red-500 peer-checked:text-white"
           >
-          <fa-icon [icon]="faCheck"></fa-icon>
+          <span class="material-symbols-outlined">check</span>
           <span class="sr-only">Red</span>
         </label>
       </div>
@@ -62,9 +59,8 @@
         <input
           id="violet-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="violet"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="violet-radio-label"
         />
@@ -73,7 +69,7 @@
           for="violet-radio"
           class="inline-flex items-center justify-center w-8 h-8 text-transparent border border-gray-200 rounded cursor-pointer bg-violet-700 hover:bg-violet-500 peer-checked:text-white"
           >
-          <fa-icon [icon]="faCheck"></fa-icon>
+          <span class="material-symbols-outlined">check</span>
           <span class="sr-only">Violet</span>
         </label>
       </div>
@@ -81,9 +77,8 @@
         <input
           id="gray-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="gray"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="gray-radio-label"
         />
@@ -92,7 +87,7 @@
           for="gray-radio"
           class="inline-flex items-center justify-center w-8 h-8 text-transparent border border-gray-200 rounded cursor-pointer bg-gray-700 hover:bg-gray-500 peer-checked:text-white"
           >
-          <fa-icon [icon]="faCheck"></fa-icon>
+          <span class="material-symbols-outlined">check</span>
           <span class="sr-only">Gray</span>
         </label>
       </div>
@@ -100,9 +95,8 @@
         <input
           id="green-radio"
           type="radio"
+          [formField]="form.backgroundColor"
           value="green"
-          name="backgroundColor"
-          formControlName="backgroundColor"
           class="sr-only peer"
           aria-labelledby="green-radio-label"
         />
@@ -111,7 +105,7 @@
           for="green-radio"
           class="inline-flex items-center justify-center w-8 h-8 text-transparent border border-gray-200 rounded cursor-pointer bg-green-700 hover:bg-green-500 peer-checked:text-white"
         >
-          <fa-icon [icon]="faCheck"></fa-icon>
+          <span class="material-symbols-outlined">check</span>
           <span class="sr-only">Green</span>
         </label>
       </div>
@@ -120,7 +114,7 @@
   <div>
     <div class="relative">
       <input
-        formControlName="title"
+        [formField]="form.title"
         placeholder="Enter title"
         type="text"
         class="w-full rounded bg-gray-100 border-gray-300 border-2"

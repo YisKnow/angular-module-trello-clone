@@ -1,53 +1,49 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-
-import {
-  faBell,
-  faInfoCircle,
-  faClose,
-  faAngleDown
-} from '@fortawesome/free-solid-svg-icons';
-import { Colors, NAVBAR_BACKGROUNDS } from '@models/colors.model';
+import { Component, computed, inject } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { NAVBAR_BACKGROUNDS } from '@models/colors.model';
 
 import { AuthService } from '@services/auth.service';
 import { BoardsService } from '@services/boards.service';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { BoardFormComponent } from '@layout/components/board-form/board-form.component';
 
 @Component({
   selector: 'app-navbar',
+  standalone: true,
+  imports: [
+    RouterLink,
+    NgClass,
+    OverlayModule,
+    ButtonComponent,
+    BoardFormComponent,
+  ],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent {
-  faBell = faBell;
-  faInfoCircle = faInfoCircle;
-  faClose = faClose;
-  faAngleDown = faAngleDown;
-
   isOpenOverlayAvatar = false;
   isOpenOverlayBoards = false;
   isOpenOverlayCreateBoard = false;
 
-  user$ = this.authService.user$;
-  navBarBackgroundColor: Colors = 'sky';
+  private readonly authService = inject(AuthService);
+  private readonly boardsService = inject(BoardsService);
+  private readonly router = inject(Router);
+
+  user = this.authService.user;
+  navBarBackgroundColor = this.boardsService.backgroundColor;
   navBarColors = NAVBAR_BACKGROUNDS;
 
-  constructor(private readonly authService: AuthService, private readonly router: Router, private readonly boardsService: BoardsService) {
-    this.boardsService.backgroundColor$.subscribe(color => {
-      this.navBarBackgroundColor = color;
-    });
-  }
+  colors = computed(() => {
+    return this.navBarColors[this.navBarBackgroundColor()] || {};
+  });
 
   logout() {
-    console.log('logout');
     this.authService.logout();
     this.router.navigate(['/login']);
   }
 
   close(event: boolean) {
     this.isOpenOverlayCreateBoard = event;
-  }
-
-  get colors() {
-    const classes = this.navBarColors[this.navBarBackgroundColor] || {};
-    return classes;
   }
 }

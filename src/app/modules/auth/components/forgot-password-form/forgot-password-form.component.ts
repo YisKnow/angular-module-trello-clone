@@ -1,42 +1,67 @@
-import { Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import {
+  form,
+  schema,
+  required,
+  email,
+  FormField,
+  FormRoot,
+} from '@angular/forms/signals';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subject, catchError, exhaustMap, of, tap } from 'rxjs';
 
 import { RequestStatus } from '@models/request-status.model';
+
+import { ButtonComponent } from '@shared/components/button/button.component';
 import { AuthService } from '@services/auth.service';
+
 @Component({
   selector: 'app-forgot-password-form',
-  templateUrl: './forgot-password-form.component.html'
+  standalone: true,
+  imports: [FormField, FormRoot, ButtonComponent],
+  templateUrl: './forgot-password-form.component.html',
 })
 export class ForgotPasswordFormComponent {
+  private readonly authService = inject(AuthService);
 
-  form = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.email, Validators.required]],
-  });
+  private readonly recoverySubject = new Subject<{ email: string }>();
+
+  readonly recoveryResult = toSignal(
+    this.recoverySubject.pipe(
+      exhaustMap(({ email }) =>
+        this.authService.recovery(email).pipe(
+          tap({
+            next: () => {
+              this.status = 'success';
+              this.emailSent = true;
+            },
+            error: () => {
+              this.status = 'failed';
+            },
+          }),
+          catchError(() => of(null)),
+        ),
+      ),
+    ),
+    { initialValue: null },
+  );
+
   status: RequestStatus = 'init';
   emailSent = false;
 
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly authService: AuthService
-  ) { }
-
-  sendLink() {
-    if (this.form.valid) {
-      this.status = 'loading';
-      const { email } = this.form.getRawValue();
-
-      this.authService.recovery(email).subscribe({
-        next: () => {
-          this.status = 'success';
-          this.emailSent = true;
+  readonly form = form(
+    signal<{ email: string }>({ email: '' }),
+    schema((path) => {
+      required(path.email);
+      email(path.email);
+    }),
+    {
+      submission: {
+        action: async () => {
+          this.status = 'loading';
+          this.recoverySubject.next({ email: this.form().value().email });
         },
-        error: () => {
-          this.status = 'failed';
-        }
-      });
-    } else {
-      this.form.markAllAsTouched();
-    }
-  }
-
+      },
+    },
+  );
 }
