@@ -33,10 +33,13 @@ export class ForgotPasswordFormComponent {
           tap({
             next: () => {
               this.status = 'success';
+              this.errorMessage = '';
               this.emailSent = true;
             },
-            error: () => {
+            error: (err) => {
               this.status = 'failed';
+              this.errorMessage =
+                err?.error?.message || 'Could not send recovery link. Please try again.';
             },
           }),
           catchError(() => of(null)),
@@ -47,6 +50,7 @@ export class ForgotPasswordFormComponent {
   );
 
   status: RequestStatus = 'init';
+  errorMessage = '';
   emailSent = false;
 
   readonly form = form(
