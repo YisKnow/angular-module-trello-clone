@@ -39,6 +39,7 @@ describe('tokenInterceptor', () => {
   let authService: AuthService;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([tokenInterceptor])),

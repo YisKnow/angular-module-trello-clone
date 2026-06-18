@@ -30,11 +30,9 @@ describe('AuthService', () => {
   let tokenService: TokenService;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
-        // No token interceptor here: the auth service spec exercises
-        // the service contract in isolation. The interceptor spec
-        // covers the end-to-end flow.
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -46,6 +44,10 @@ describe('AuthService', () => {
     tokenService.removeToken();
     tokenService.removeRefreshToken();
   });
+
+  // -----------------------------------------------------------------------
+  // login
+  // -----------------------------------------------------------------------
 
   it('login() persists the access and refresh tokens returned by the API', async () => {
     const access = makeJwt({ exp: 9999999999 });
@@ -63,6 +65,10 @@ describe('AuthService', () => {
     expect(tokenService.getRefreshToken()).toBe(refresh);
   });
 
+  // -----------------------------------------------------------------------
+  // refreshToken
+  // -----------------------------------------------------------------------
+
   it('refreshToken() persists the rotated tokens returned by the API', () => {
     const access = makeJwt({ exp: 9999999999 });
     const refresh = makeJwt({ exp: 9999999999 });
@@ -79,6 +85,118 @@ describe('AuthService', () => {
     expect(tokenService.getRefreshToken()).toBe(refresh);
   });
 
+  // -----------------------------------------------------------------------
+  // register
+  // -----------------------------------------------------------------------
+
+  it('register() makes POST request with name, email, password', () => {
+    authService.register('Alice', 'a@b.com', 'secret').subscribe();
+
+    const req = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/register') && r.method === 'POST',
+    );
+    expect(req.request.body).toEqual({ name: 'Alice', email: 'a@b.com', password: 'secret' });
+    req.flush({});
+  });
+
+  // -----------------------------------------------------------------------
+  // registerAndLogin
+  // -----------------------------------------------------------------------
+
+  it('registerAndLogin() chains register then login', () => {
+    const access = makeJwt({ exp: 9999999999 });
+    const refresh = makeJwt({ exp: 9999999999 });
+
+    const sub = authService.registerAndLogin('Alice', 'a@b.com', 'secret').subscribe();
+
+    // First: register POST
+    const registerReq = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/register') && r.method === 'POST',
+    );
+    expect(registerReq.request.body).toEqual({ name: 'Alice', email: 'a@b.com', password: 'secret' });
+    registerReq.flush({});
+
+    // Then: login POST (switchMap)
+    const loginReq = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/login') && r.method === 'POST',
+    );
+    expect(loginReq.request.body).toEqual({ email: 'a@b.com', password: 'secret' });
+    loginReq.flush({ access_token: access, refresh_token: refresh });
+    sub.unsubscribe();
+
+    expect(tokenService.getToken()).toBe(access);
+  });
+
+  // -----------------------------------------------------------------------
+  // isAvailable
+  // -----------------------------------------------------------------------
+
+  it('isAvailable() returns availability from the API', () => {
+    let result: boolean | undefined;
+    authService.isAvailable('a@b.com').subscribe((r) => (result = r.isAvailable));
+
+    const req = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/is-available') && r.method === 'POST',
+    );
+    expect(req.request.body).toEqual({ email: 'a@b.com' });
+    req.flush({ isAvailable: true });
+
+    expect(result).toBe(true);
+  });
+
+  // -----------------------------------------------------------------------
+  // recovery
+  // -----------------------------------------------------------------------
+
+  it('recovery() sends email to the API', () => {
+    authService.recovery('a@b.com').subscribe();
+
+    const req = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/recovery') && r.method === 'POST',
+    );
+    expect(req.request.body).toEqual({ email: 'a@b.com' });
+    req.flush({});
+  });
+
+  // -----------------------------------------------------------------------
+  // changePassword
+  // -----------------------------------------------------------------------
+
+  it('changePassword() sends token and new password', () => {
+    authService.changePassword('tok123', 'new-pass').subscribe();
+
+    const req = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/change-password') && r.method === 'POST',
+    );
+    expect(req.request.body).toEqual({ token: 'tok123', newPassword: 'new-pass' });
+    req.flush({});
+  });
+
+  // -----------------------------------------------------------------------
+  // getProfile
+  // -----------------------------------------------------------------------
+
+  it('getProfile() fetches user and updates the user signal', () => {
+    const user = {
+      id: 1, name: 'Alice', email: 'a@b.com', avatar: '', creationAt: '', updatedAt: '',
+    };
+    let emitted: typeof user | undefined;
+    authService.getProfile().subscribe((u) => (emitted = u));
+
+    const req = httpMock.expectOne(
+      (r) => r.url.endsWith('/api/v1/auth/profile') && r.method === 'GET',
+    );
+    req.flush(user);
+
+    expect(emitted).toEqual(user);
+    expect(authService.user()).toEqual(user);
+    expect(authService.getDataUser()).toEqual(user);
+  });
+
+  // -----------------------------------------------------------------------
+  // logout
+  // -----------------------------------------------------------------------
+
   it('logout() clears both cookies and the user signal', () => {
     tokenService.saveToken('x');
     tokenService.saveRefreshToken('y');
@@ -88,17 +206,25 @@ describe('AuthService', () => {
     expect(authService.getDataUser()).toBeNull();
   });
 
+  // -----------------------------------------------------------------------
+  // getDataUser
+  // -----------------------------------------------------------------------
+
+  it('getDataUser() returns the current user signal value', () => {
+    expect(authService.getDataUser()).toBeNull();
+    // After login + getProfile it should be set (tested in getProfile test)
+  });
+
+  // -----------------------------------------------------------------------
+  // refreshShare
+  // -----------------------------------------------------------------------
+
   it('refreshShare returns the same Observable for concurrent subscribers', () => {
-    // Set a valid refresh token so refreshShare can build its slot.
     const refresh = makeJwt({ exp: 9999999999 });
     tokenService.saveRefreshToken(refresh);
 
-    // refreshShare() is the building block the interceptor uses for
-    // single-flight refresh; the interceptor spec exercises the
-    // end-to-end behavior. Here we just check the contract.
     const a = authService.refreshShare();
     const b = authService.refreshShare();
-    // Same identity, so subscribers see the same multicast.
     expect(a).toBe(b);
   });
 

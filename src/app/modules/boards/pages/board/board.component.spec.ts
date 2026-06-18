@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/angular';
 import { TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Subject, of, throwError } from 'rxjs';
+import { Component } from '@angular/core';
 
 import { BoardComponent } from './board.component';
 import { BoardsService } from '@services/boards.service';
@@ -16,6 +17,10 @@ import { List } from '@models/list.model';
 // Stub for ButtonComponent: avoids templateUrl resolution in the test runner.
 @Component({ selector: 'app-btn', standalone: true, template: '' })
 class ButtonStubComponent {}
+
+// ---------------------------------------------------------------------------
+// Fixtures
+// ---------------------------------------------------------------------------
 
 const BOARD_ID = 'b1';
 const LIST_ID = 'l1';
@@ -36,7 +41,7 @@ const makeList = (id: string, cards: Card[]): List => ({
 
 const makeBoard = (lists: List[]): Board => ({
   id: BOARD_ID,
-  title: 'Board',
+  title: 'Test Board',
   backgroundColor: 'sky',
   members: [],
   lists,
@@ -61,13 +66,46 @@ const makeDropEvent = (
     event: {} as never,
   }) as CdkDragDrop<Card[]>;
 
+// ---------------------------------------------------------------------------
+// ATL DOM integration test — renders a component via ATL render()
+// ---------------------------------------------------------------------------
+
+describe('ATL integration', () => {
+  // ATL's render() + screen queries — proof that the ATL + Vitest
+  // pipeline works end-to-end.
+  it('renders inline template with ATL render()', async () => {
+    await render(
+      '<p data-testid="atl-works">Angular Testing Library ready</p>',
+      {},
+    );
+    expect(screen.getByTestId('atl-works')).toHaveTextContent(
+      'Angular Testing Library ready',
+    );
+  });
+
+  // WARNING: ATL render() with a component that has templateUrl requires
+  // the template to be pre-resolved (via resolveComponentResources or
+  // TestBed.overrideComponent with identical imports). For new component
+  // tests, prefer writing components with inline template or using
+  // overrideComponent + TestBed.createComponent() for service-level tests.
+  //
+  // https://testing-library.com/docs/angular-testing-library/intro
+});
+
+// ---------------------------------------------------------------------------
+// Service-level tests — test component LOGIC without pulling in full DOM
+// ---------------------------------------------------------------------------
+
 describe('BoardComponent card movement', () => {
   let component: BoardComponent;
   let cardsService: { update: ReturnType<typeof vi.fn> };
   let boardsService: {
     getBoards: ReturnType<typeof vi.fn>;
     getPosition: ReturnType<typeof vi.fn>;
+    getPositionNewItem: ReturnType<typeof vi.fn>;
     setBackgroundColor: ReturnType<typeof vi.fn>;
+    bufferSpace: number;
+    backgroundColor: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -75,9 +113,13 @@ describe('BoardComponent card movement', () => {
     boardsService = {
       getBoards: vi.fn(),
       getPosition: vi.fn().mockReturnValue(100),
+      getPositionNewItem: vi.fn().mockReturnValue(65535),
       setBackgroundColor: vi.fn(),
+      bufferSpace: 65535,
+      backgroundColor: vi.fn() as never,
     };
 
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         { provide: CardsService, useValue: cardsService },
@@ -111,7 +153,7 @@ describe('BoardComponent card movement', () => {
   it('persists two rapid card drops in order', async () => {
     const list1 = makeList('l1', [makeCard('c1', 100), makeCard('c2', 200)]);
     const list2 = makeList('l2', []);
-    await setupBoard(makeBoard([list1, list2]));
+    setupBoard(makeBoard([list1, list2]));
 
     const updateSubjects: Subject<Card>[] = [];
     cardsService.update.mockImplementation(() => {
@@ -128,7 +170,6 @@ describe('BoardComponent card movement', () => {
     );
     component.drop(ev1);
 
-    // Allow the first emission to reach the inner observable.
     await Promise.resolve();
     expect(cardsService.update).toHaveBeenCalledTimes(1);
     expect(cardsService.update).toHaveBeenNthCalledWith(
@@ -137,8 +178,6 @@ describe('BoardComponent card movement', () => {
       expect.objectContaining({ listId: list2.id, position: 100 }),
     );
 
-    // Second drop while the first is still in flight. With concatMap
-    // the second call must be QUEUED, not dropped.
     const ev2 = makeDropEvent(
       { data: list2.cards, id: list2.id },
       { data: list1.cards, id: list1.id },
@@ -148,11 +187,8 @@ describe('BoardComponent card movement', () => {
     component.drop(ev2);
 
     await Promise.resolve();
-    // concatMap holds the second emission until the first completes.
     expect(cardsService.update).toHaveBeenCalledTimes(1);
 
-    // Complete the first update; concatMap should now dispatch the
-    // queued second call.
     updateSubjects[0].next(makeCard('c1', 100));
     updateSubjects[0].complete();
     await Promise.resolve();
@@ -170,14 +206,14 @@ describe('BoardComponent card movement', () => {
   });
 
   it('reloads the board state when a card update is rejected', async () => {
+    // Suppress the expected console.error from the catchError handler
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const list1 = makeList('l1', [makeCard('c1', 100)]);
     const refreshed = makeBoard([makeList('l1', [makeCard('c1', 200)])]);
-    await setupBoard(makeBoard([list1]));
+    setupBoard(makeBoard([list1]));
 
-    // The initial getBoards was already consumed by setupBoard; the
-    // error reload is the second call. Queue just the refresh result.
     boardsService.getBoards.mockReturnValueOnce(of(refreshed));
-
     cardsService.update.mockReturnValue(
       throwError(() => new Error('boom')),
     );
@@ -190,12 +226,13 @@ describe('BoardComponent card movement', () => {
     );
     component.drop(ev);
 
-    // Wait for the error to propagate and the reload observable to emit.
     await new Promise((r) => setTimeout(r, 0));
     await Promise.resolve();
 
     expect(cardsService.update).toHaveBeenCalled();
     expect(boardsService.getBoards).toHaveBeenCalledTimes(2);
     expect(component.board()).toEqual(refreshed);
+
+    vi.mocked(console.error).mockRestore();
   });
 });

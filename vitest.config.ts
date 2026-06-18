@@ -39,5 +39,18 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.spec.ts'],
     setupFiles: ['src/test-setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'clover'],
+      thresholds: {
+        // Lines/stmts 80% protects total coverage; branches/funcs are
+        // lower because board.component.ts (CDK drag-drop + dialog)
+        // and button.component.ts (templateUrl) have limited test reach.
+        lines: 80,
+        statements: 78,
+        functions: 78,
+        branches: 65,
+      },
+    },
   },
 });

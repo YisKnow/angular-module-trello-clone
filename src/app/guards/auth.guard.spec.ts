@@ -25,6 +25,7 @@ describe('authGuard', () => {
   let router: Router;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [provideRouter([])],
     });
