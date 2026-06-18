@@ -36,3 +36,10 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Workspace-level (SDD/OpenSpec planning artifacts, agent skills)
+.agents/
+.atl/
+.claude/
+openspec/
+skills-lock.json
