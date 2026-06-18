@@ -11,6 +11,7 @@ import { CustomValidators } from '@utils/validators';
 
 @Component({
   selector: 'app-recovery-form',
+  standalone: false,
   templateUrl: './recovery-form.component.html',
 })
 export class RecoveryFormComponent {

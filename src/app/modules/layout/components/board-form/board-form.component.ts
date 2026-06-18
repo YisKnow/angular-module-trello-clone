@@ -10,6 +10,7 @@ import { BoardsService } from '@services/boards.service';
 
 @Component({
   selector: 'app-board-form',
+  standalone: false,
   templateUrl: './board-form.component.html',
 })
 export class BoardFormComponent {

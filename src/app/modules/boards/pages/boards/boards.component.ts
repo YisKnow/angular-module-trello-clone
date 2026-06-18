@@ -9,6 +9,7 @@ import { MeService } from '@services/me.service';
 
 @Component({
   selector: 'app-boards',
+  standalone: false,
   templateUrl: './boards.component.html'
 })
 export class BoardsComponent implements OnInit {

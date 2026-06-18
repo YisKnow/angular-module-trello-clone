@@ -4,6 +4,7 @@ import { COLORS, Colors } from '@models/colors.model';
 
 @Component({
   selector: 'app-card-color',
+  standalone: false,
   templateUrl: './card-color.component.html',
   styles: [
   ]

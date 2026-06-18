@@ -5,6 +5,7 @@ import { RequestStatus } from '@models/request-status.model';
 import { AuthService } from '@services/auth.service';
 @Component({
   selector: 'app-forgot-password-form',
+  standalone: false,
   templateUrl: './forgot-password-form.component.html'
 })
 export class ForgotPasswordFormComponent {

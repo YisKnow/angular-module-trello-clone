@@ -4,6 +4,7 @@ import { COLORS, Colors } from '@models/colors.model';
 
 @Component({
   selector: 'app-btn',
+  standalone: false,
   templateUrl: './button.component.html',
 })
 export class ButtonComponent {

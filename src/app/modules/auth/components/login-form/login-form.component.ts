@@ -10,6 +10,7 @@ import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-login-form',
+  standalone: false,
   templateUrl: './login-form.component.html'
 })
 export class LoginFormComponent {

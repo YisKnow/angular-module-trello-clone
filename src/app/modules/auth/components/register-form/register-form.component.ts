@@ -12,6 +12,7 @@ import { CustomValidators } from '@utils/validators';
 
 @Component({
   selector: 'app-register-form',
+  standalone: false,
   templateUrl: './register-form.component.html',
 })
 export class RegisterFormComponent {

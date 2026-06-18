@@ -6,6 +6,7 @@ import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-layout',
+  standalone: false,
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent implements OnInit {

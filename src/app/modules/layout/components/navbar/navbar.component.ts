@@ -14,6 +14,7 @@ import { BoardsService } from '@services/boards.service';
 
 @Component({
   selector: 'app-navbar',
+  standalone: false,
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent {

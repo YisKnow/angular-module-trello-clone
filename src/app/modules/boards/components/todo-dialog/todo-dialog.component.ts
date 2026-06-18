@@ -23,6 +23,7 @@ interface OutputData {
 
 @Component({
   selector: 'app-todo-dialog',
+  standalone: false,
   templateUrl: './todo-dialog.component.html',
 })
 export class TodoDialogComponent {

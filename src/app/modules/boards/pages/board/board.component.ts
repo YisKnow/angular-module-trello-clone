@@ -20,6 +20,7 @@ import { ListService } from '@services/list.service';
 
 @Component({
   selector: 'app-board',
+  standalone: false,
   templateUrl: './board.component.html',
   styles: [
     `

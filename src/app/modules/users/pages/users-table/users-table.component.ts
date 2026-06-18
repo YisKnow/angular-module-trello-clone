@@ -9,6 +9,7 @@ import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-users-table',
+  standalone: false,
   templateUrl: './users-table.component.html'
 })
 export class UsersTableComponent implements OnInit  {
