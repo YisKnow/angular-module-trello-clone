@@ -8,55 +8,71 @@ import { jwtDecode, JwtPayload } from 'jwt-decode';
 })
 export class TokenService {
 
+  private static readonly ACCESS_COOKIE = 'token-trello';
+  private static readonly REFRESH_COOKIE = 'refresh-token-trello';
+
   saveToken(token: string) {
-    setCookie('token-trello', token, { expires: 365, path: '/' });
+    setCookie(TokenService.ACCESS_COOKIE, token, { expires: 365, path: '/' });
   }
 
   getToken() {
-    return getCookie('token-trello');
+    return getCookie(TokenService.ACCESS_COOKIE);
   }
 
   removeToken() {
-    removeCookie('token-trello');
+    removeCookie(TokenService.ACCESS_COOKIE);
   }
 
   saveRefreshToken(token: string) {
-    setCookie('refresh-token-trello', token, { expires: 365, path: '/' });
+    setCookie(TokenService.REFRESH_COOKIE, token, { expires: 365, path: '/' });
   }
 
   getRefreshToken() {
-    return getCookie('refresh-token-trello');
+    return getCookie(TokenService.REFRESH_COOKIE);
   }
 
   removeRefreshToken() {
-    removeCookie('refresh-token-trello');
+    removeCookie(TokenService.REFRESH_COOKIE);
   }
 
   isValidToken() {
-    const token = this.getToken();
-    if (!token) return false;
-
-    const decodeToken = jwtDecode<JwtPayload>(token);
-    if (decodeToken?.exp) {
-      const tokenDate = new Date(0);
-      tokenDate.setUTCSeconds(decodeToken.exp);
-      const today = new Date();
-      return tokenDate.getTime() > today.getTime();
-    }
-    return false;
+    return this.isValidJwt(this.getToken(), TokenService.ACCESS_COOKIE);
   }
 
   isValidRefreshToken() {
-    const token = this.getRefreshToken();
+    return this.isValidJwt(
+      this.getRefreshToken(),
+      TokenService.REFRESH_COOKIE,
+    );
+  }
+
+  // Centralized JWT validation. Returns false for any malformed or
+  // expired token instead of throwing, and clears the offending cookie
+  // so a corrupt value cannot keep breaking navigation.
+  private isValidJwt(
+    token: string | null | undefined,
+    cookieName: string,
+  ): boolean {
     if (!token) return false;
 
-    const decodeToken = jwtDecode<JwtPayload>(token);
-    if (decodeToken?.exp) {
-      const tokenDate = new Date(0);
-      tokenDate.setUTCSeconds(decodeToken.exp);
-      const today = new Date();
-      return tokenDate.getTime() > today.getTime();
+    let payload: JwtPayload;
+    try {
+      payload = jwtDecode<JwtPayload>(token);
+    } catch {
+      this.removeCookie(cookieName);
+      return false;
     }
-    return false;
+
+    if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+      this.removeCookie(cookieName);
+      return false;
+    }
+
+    // exp is in epoch seconds; compare against current epoch seconds.
+    return payload.exp > Date.now() / 1000;
+  }
+
+  private removeCookie(name: string) {
+    removeCookie(name, { path: '/' });
   }
 }

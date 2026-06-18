@@ -17,6 +17,7 @@ import { Dialog, DialogModule } from '@angular/cdk/dialog';
 import {
   Subject,
   catchError,
+  concatMap,
   exhaustMap,
   firstValueFrom,
   of,
@@ -157,12 +158,19 @@ export class BoardComponent implements OnDestroy {
       { initialValue: null },
     );
 
-    // Update a card's position
+    // Update a card's position. concatMap preserves order: a second
+    // drop while the first update is in flight is queued, not
+    // discarded. On HTTP failure we reload the board from the
+    // server so local state reconciles to the source of truth.
     toSignal(
       this.cardUpdate$.pipe(
-        exhaustMap(({ card, position, listId }) =>
+        concatMap(({ card, position, listId }) =>
           this.cardsService.update(card.id, { position, listId }).pipe(
-            catchError(() => of(null)),
+            catchError((err) => {
+              console.error('Failed to persist card move', err);
+              void this.reloadBoard();
+              return of(null);
+            }),
           ),
         ),
       ),
@@ -258,5 +266,14 @@ export class BoardComponent implements OnDestroy {
     } catch (err) {
       console.error('Failed to load board', err);
     }
+  }
+
+  // Re-fetches the current board and replaces local state. Called
+  // when a card update fails so the UI reconciles to the server.
+  private async reloadBoard() {
+    const pm = this.paramMap();
+    const boardId = pm?.get('boardId');
+    if (!boardId) return;
+    await this.loadBoard(boardId);
   }
 }
