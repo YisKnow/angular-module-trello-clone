@@ -7,9 +7,9 @@ export const redirectGuard: CanActivateFn = () => {
   const tokenService = inject(TokenService);
   const router = inject(Router);
 
-  const isValidToken = tokenService.isValidRefreshToken();
-  if (isValidToken) {
-    router.navigate(['/app']);
-  }
-  return true;
+  // Already authenticated: send the user into the app, otherwise let
+  // the auth route render (login / register).
+  return tokenService.isValidRefreshToken()
+    ? router.createUrlTree(['/app'])
+    : true;
 };

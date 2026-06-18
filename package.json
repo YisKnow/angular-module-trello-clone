@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "ng lint"
   },
   "private": true,
@@ -21,6 +22,10 @@
     "@angular/platform-browser": "~22.0.2",
     "@angular/router": "~22.0.2",
     "@material-symbols/font-400": "^0.45.2",
+    "@testing-library/angular": "^19.4.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
     "jwt-decode": "^4.0.0",
     "rxjs": "~7.8.2",
     "typescript-cookie": "^1.0.6"
@@ -32,6 +37,7 @@
     "@angular/compiler-cli": "~22.0.2",
     "@tailwindcss/forms": "~0.5.11",
     "@tailwindcss/postcss": "^4.3",
+    "@vitest/coverage-v8": "^4.1.9",
     "angular-eslint": "^22.0.0",
     "eslint": "^10.5.0",
     "jsdom": "^29.1.1",

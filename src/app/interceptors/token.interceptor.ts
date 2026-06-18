@@ -5,10 +5,11 @@ import {
   HttpEvent,
   HttpInterceptorFn,
   HttpContextToken,
-  HttpContext
+  HttpContext,
+  HttpErrorResponse,
 } from '@angular/common/http';
 
-import { Observable, switchMap } from 'rxjs';
+import { Observable, catchError, switchMap, throwError } from 'rxjs';
 
 import { TokenService } from '@services/token.service';
 import { AuthService } from '@services/auth.service';
@@ -26,44 +27,69 @@ export const tokenInterceptor: HttpInterceptorFn = (
   const tokenService = inject(TokenService);
   const authService = inject(AuthService);
 
-  if (request.context.get(CHECK_TOKEN)) {
-    const isValidToken = tokenService.isValidToken();
-    if (isValidToken) {
-      return addToken(request, next, tokenService);
-    } else {
-      return updateAccessTokenAndRefreshToken(request, next, tokenService, authService);
-    }
+  if (!request.context.get(CHECK_TOKEN)) {
+    return next(request);
   }
-  return next(request);
+
+  if (tokenService.isValidToken()) {
+    return addToken(request, next, tokenService);
+  }
+
+  return refreshAndRetry(request, next, tokenService, authService);
 };
 
 function addToken(
   request: HttpRequest<unknown>,
   next: HttpHandlerFn,
-  tokenService: TokenService
+  tokenService: TokenService,
 ): Observable<HttpEvent<unknown>> {
   const accessToken = tokenService.getToken();
-  if (accessToken) {
-    const authRequest = request.clone({
-      headers: request.headers.set('Authorization', `Bearer ${accessToken}`)
-    });
-    return next(authRequest);
+  if (!accessToken) {
+    // No credential to attach — fail closed rather than forwarding an
+    // unauthenticated request to a protected endpoint.
+    return throwError(
+      () =>
+        new HttpErrorResponse({
+          status: 401,
+          statusText: 'Unauthorized',
+          error: { message: 'Missing access token' },
+        }),
+    );
   }
-  return next(request);
+  const authRequest = request.clone({
+    headers: request.headers.set('Authorization', `Bearer ${accessToken}`),
+  });
+  return next(authRequest);
 }
 
-function updateAccessTokenAndRefreshToken(
+function refreshAndRetry(
   request: HttpRequest<unknown>,
   next: HttpHandlerFn,
   tokenService: TokenService,
-  authService: AuthService
+  authService: AuthService,
 ): Observable<HttpEvent<unknown>> {
-  const refreshToken = tokenService.getRefreshToken();
-  const isValidRefreshToken = tokenService.isValidRefreshToken();
-  if (refreshToken && isValidRefreshToken) {
-    return authService.refreshToken(refreshToken).pipe(
-      switchMap(() => addToken(request, next, tokenService))
+  if (
+    !tokenService.getRefreshToken() ||
+    !tokenService.isValidRefreshToken()
+  ) {
+    return throwError(
+      () =>
+        new HttpErrorResponse({
+          status: 401,
+          statusText: 'Unauthorized',
+          error: { message: 'No valid refresh token' },
+        }),
     );
   }
-  return next(request);
+
+  return authService.refreshShare().pipe(
+    switchMap(() => addToken(request, next, tokenService)),
+    catchError((err) => {
+      // Refresh itself failed: clear credentials so the rest of the
+      // app treats the user as logged out, and propagate the error.
+      tokenService.removeToken();
+      tokenService.removeRefreshToken();
+      return throwError(() => err);
+    }),
+  );
 }

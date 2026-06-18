@@ -41,10 +41,13 @@ export class RecoveryFormComponent {
           tap({
             next: () => {
               this.status = 'success';
+              this.errorMessage = '';
               this.router.navigate(['/login']);
             },
-            error: () => {
+            error: (err) => {
               this.status = 'failed';
+              this.errorMessage =
+                err?.error?.message || 'Password change failed. Please try again.';
               this.router.navigate(['/login']);
             },
           }),
@@ -67,6 +70,7 @@ export class RecoveryFormComponent {
     },
   );
   status: RequestStatus = 'init';
+  errorMessage = '';
   showPassword = false;
   token = '';
 

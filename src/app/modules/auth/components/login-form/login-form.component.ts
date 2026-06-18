@@ -38,10 +38,13 @@ export class LoginFormComponent {
           tap({
             next: () => {
               this.status = 'success';
+              this.errorMessage = '';
               this.router.navigate(['/app']);
             },
-            error: () => {
+            error: (err) => {
               this.status = 'failed';
+              this.errorMessage =
+                err?.error?.message || 'Credentials are invalid. Please try again.';
             },
           }),
           catchError(() => of(null)),
@@ -53,6 +56,7 @@ export class LoginFormComponent {
 
   showPassword = false;
   status: RequestStatus = 'init';
+  errorMessage = '';
 
   readonly form = form(
     signal<{ email: string; password: string }>({ email: '', password: '' }),
