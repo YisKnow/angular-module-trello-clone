@@ -45,7 +45,7 @@ export class ForgotPasswordFormComponent {
   );
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly recoveryAsync = toAsyncSignal<{ email: string }, void>({
+  private readonly _recoveryAsync = toAsyncSignal<{ email: string }, void>({
     subject: this.recoverySubject,
     action: ({ email }) => this.authFacade.recovery(email),
     onStart: () => { this.status = 'loading'; },

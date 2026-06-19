@@ -1,17 +1,14 @@
 import { Injectable, Signal, inject, signal } from '@angular/core';
 
 import { User } from '@features/auth/domain/entities/user.entity';
-import {
-  USERS_REPOSITORY,
-  UsersRepository,
-} from '../../domain/repositories/users.repository';
+import { UsersHttpRepository } from '../../infrastructure/repositories/users-http.repository';
 
 @Injectable({ providedIn: 'root' })
 export class UsersFacade {
   private readonly _users = signal<User[]>([]);
   readonly users: Signal<User[]> = this._users.asReadonly();
 
-  private readonly usersRepository = inject(USERS_REPOSITORY);
+  private readonly usersRepository = inject(UsersHttpRepository);
 
   async loadUsers(): Promise<User[]> {
     const users = await this.usersRepository.getUsers();

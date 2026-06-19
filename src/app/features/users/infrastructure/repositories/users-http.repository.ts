@@ -8,14 +8,11 @@ import { environment } from '@environments/environment';
 import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { User } from '@features/auth/domain/entities/user.entity';
-import {
-  UsersRepository,
-} from '../../domain/repositories/users.repository';
 import { AuthMapper } from '@features/auth/application/mappers/auth.mapper';
 import { UserDto } from '@features/auth/application/dtos/auth.dto';
 
 @Injectable({ providedIn: 'root' })
-export class UsersHttpRepository implements UsersRepository {
+export class UsersHttpRepository {
   private readonly apiUrl = environment.API_URL;
 
   constructor(@Inject(HttpClient) private readonly http: HttpClient) {}

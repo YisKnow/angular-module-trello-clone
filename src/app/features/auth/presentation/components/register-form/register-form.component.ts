@@ -53,7 +53,7 @@ export class RegisterFormComponent {
   statusUser: 'init' | 'loading' | 'success' | 'failed' = 'init';
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly registerAsync = toAsyncSignal<{ name: string; email: string; password: string }, unknown>({
+  private readonly _registerAsync = toAsyncSignal<{ name: string; email: string; password: string }, unknown>({
     subject: this.registerSubject,
     action: ({ name, email, password }) =>
       this.authFacade.registerAndLogin(name, email, password),
@@ -70,7 +70,7 @@ export class RegisterFormComponent {
 
   // ponytail: status for the email-availability probe; not surfaced as a
   // signal because the only signal effect is `showRegister` / navigation.
-  private readonly validateAsync = toAsyncSignal<{ email: string }, boolean>({
+  private readonly _validateAsync = toAsyncSignal<{ email: string }, boolean>({
     subject: this.validateSubject,
     action: ({ email }) => this.authFacade.isAvailable(email),
     onStart: () => { this.statusUser = 'loading'; },

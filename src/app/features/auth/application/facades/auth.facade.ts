@@ -55,7 +55,9 @@ export class AuthFacade {
   refreshShare(): Promise<AuthTokens> {
     if (this.refreshPromise) return this.refreshPromise;
     this.refreshPromise = this.authRepository.refreshShare();
-    this.refreshPromise.finally(() => { this.refreshPromise = undefined; });
+    this.refreshPromise
+      .finally(() => { this.refreshPromise = undefined; })
+      .catch(() => { /* cleanup chain — callers handle the real rejection */ });
     return this.refreshPromise;
   }
 

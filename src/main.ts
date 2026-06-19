@@ -14,8 +14,6 @@ import { LIST_REPOSITORY } from './app/features/boards/domain/repositories/list.
 import { ListHttpRepository } from './app/features/boards/infrastructure/repositories/list-http.repository';
 import { ME_REPOSITORY } from './app/features/auth/domain/repositories/me.repository';
 import { MeHttpRepository } from './app/features/auth/infrastructure/repositories/me-http.repository';
-import { USERS_REPOSITORY } from './app/features/users/domain/repositories/users.repository';
-import { UsersHttpRepository } from './app/features/users/infrastructure/repositories/users-http.repository';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -26,6 +24,5 @@ bootstrapApplication(AppComponent, {
     { provide: CARD_REPOSITORY, useExisting: CardHttpRepository },
     { provide: LIST_REPOSITORY, useExisting: ListHttpRepository },
     { provide: ME_REPOSITORY, useExisting: MeHttpRepository },
-    { provide: USERS_REPOSITORY, useExisting: UsersHttpRepository },
   ],
 }).catch((err) => console.error(err));

@@ -54,7 +54,7 @@ export class LoginFormComponent {
   );
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly loginAsync = toAsyncSignal<{ email: string; password: string }, unknown>({
+  private readonly _loginAsync = toAsyncSignal<{ email: string; password: string }, unknown>({
     subject: this.loginSubject,
     action: ({ email, password }) => this.authFacade.login(email, password),
     onStart: () => { this.status = 'loading'; },

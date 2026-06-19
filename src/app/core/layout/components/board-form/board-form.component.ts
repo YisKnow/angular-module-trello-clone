@@ -51,7 +51,7 @@ export class BoardFormComponent {
   );
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly createBoardAsync = toAsyncSignal<BoardFormModel, { id: string }>({
+  private readonly _createBoardAsync = toAsyncSignal<BoardFormModel, { id: string }>({
     subject: this.createBoardSubject,
     action: ({ title, backgroundColor }) => this.boardFacade.createBoard(title, backgroundColor),
     onStart: () => this.submitting.set(true),

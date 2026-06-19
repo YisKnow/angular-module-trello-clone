@@ -15,10 +15,6 @@ import {
 } from '../../domain/repositories/card.repository';
 import { CardMapper } from '../../application/mappers/board.mapper';
 import { CardDto } from '../../application/dtos/board.dto';
-import {
-  CreateCardRequestDto,
-  UpdateCardRequestDto,
-} from '../../application/dtos/card.dto';
 
 @Injectable({ providedIn: 'root' })
 export class CardHttpRepository implements CardRepository {
@@ -27,14 +23,8 @@ export class CardHttpRepository implements CardRepository {
   constructor(@Inject(HttpClient) private readonly http: HttpClient) {}
 
   async create(input: CreateCardInput): Promise<Card> {
-    const body: CreateCardRequestDto = {
-      title: input.title,
-      position: input.position,
-      listId: input.listId,
-      boardId: input.boardId,
-    };
     const dto = await firstValueFrom(
-      this.http.post<CardDto>(`${this.apiUrl}/api/v1/cards`, body, {
+      this.http.post<CardDto>(`${this.apiUrl}/api/v1/cards`, input, {
         context: checkToken(),
       }),
     );
@@ -42,15 +32,8 @@ export class CardHttpRepository implements CardRepository {
   }
 
   async update(id: Card['id'], change: UpdateCardInput): Promise<Card> {
-    const body: UpdateCardRequestDto = {
-      title: change.title,
-      description: change.description,
-      position: change.position,
-      listId: change.listId,
-      boardId: change.boardId,
-    };
     const dto = await firstValueFrom(
-      this.http.put<CardDto>(`${this.apiUrl}/api/v1/cards/${id}`, body, {
+      this.http.put<CardDto>(`${this.apiUrl}/api/v1/cards/${id}`, change, {
         context: checkToken(),
       }),
     );

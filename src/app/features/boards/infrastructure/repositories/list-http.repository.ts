@@ -14,9 +14,6 @@ import {
 } from '../../domain/repositories/list.repository';
 import { ListMapper } from '../../application/mappers/board.mapper';
 import { ListDto } from '../../application/dtos/board.dto';
-import {
-  CreateListRequestDto,
-} from '../../application/dtos/list.dto';
 
 @Injectable({ providedIn: 'root' })
 export class ListHttpRepository implements ListRepository {
@@ -25,13 +22,8 @@ export class ListHttpRepository implements ListRepository {
   constructor(@Inject(HttpClient) private readonly http: HttpClient) {}
 
   async create(input: CreateListInput): Promise<List> {
-    const body: CreateListRequestDto = {
-      title: input.title,
-      position: input.position,
-      boardId: input.boardId,
-    };
     const dto = await firstValueFrom(
-      this.http.post<ListDto>(`${this.apiUrl}/api/v1/lists`, body, {
+      this.http.post<ListDto>(`${this.apiUrl}/api/v1/lists`, input, {
         context: checkToken(),
       }),
     );

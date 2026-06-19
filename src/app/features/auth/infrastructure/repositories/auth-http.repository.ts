@@ -135,9 +135,13 @@ export class AuthHttpRepository implements AuthRepository {
         .pipe(this.persistTokens()),
     );
     // Always clear the slot once the in-flight request settles.
-    this.refreshPromise.finally(() => {
-      this.refreshPromise = undefined;
-    });
+    // The .catch() swallows the rejection on the cleanup chain only —
+    // callers still receive the rejection via the returned promise.
+    this.refreshPromise
+      .finally(() => {
+        this.refreshPromise = undefined;
+      })
+      .catch(() => {});
     return this.refreshPromise;
   }
 

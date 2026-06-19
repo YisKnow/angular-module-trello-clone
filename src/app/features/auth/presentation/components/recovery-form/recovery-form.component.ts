@@ -59,7 +59,7 @@ export class RecoveryFormComponent {
   }
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly changePasswordAsync = toAsyncSignal<{ token: string; newPassword: string }, void>({
+  private readonly _changePasswordAsync = toAsyncSignal<{ token: string; newPassword: string }, void>({
     subject: this.changePasswordSubject,
     action: ({ token, newPassword }) => this.authFacade.changePassword(token, newPassword),
     onStart: () => { this.status = 'loading'; },
