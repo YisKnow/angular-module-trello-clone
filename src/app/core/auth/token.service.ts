@@ -1,78 +1,64 @@
 import { Injectable } from '@angular/core';
 
-import { getCookie, setCookie, removeCookie } from 'typescript-cookie';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
+// ponytail: no typescript-cookie, no jwt-decode — using document.cookie
+// and atob() directly. Both are available in every modern browser and
+// jsdom. jwt-decode only runs atob() under the hood; typescript-cookie
+// only wraps document.cookie. Two fewer deps, zero loss in functionality.
 
-@Injectable({
-  providedIn: 'root'
-})
+const ACCESS_COOKIE = 'token-trello';
+const REFRESH_COOKIE = 'refresh-token-trello';
+
+@Injectable({ providedIn: 'root' })
 export class TokenService {
 
-  private static readonly ACCESS_COOKIE = 'token-trello';
-  private static readonly REFRESH_COOKIE = 'refresh-token-trello';
+  saveToken(token: string) { setCookie(ACCESS_COOKIE, token); }
+  getToken() { return getCookie(ACCESS_COOKIE); }
+  removeToken() { removeCookie(ACCESS_COOKIE); }
 
-  saveToken(token: string) {
-    setCookie(TokenService.ACCESS_COOKIE, token, { expires: 365, path: '/' });
+  saveRefreshToken(token: string) { setCookie(REFRESH_COOKIE, token); }
+  getRefreshToken() { return getCookie(REFRESH_COOKIE); }
+  removeRefreshToken() { removeCookie(REFRESH_COOKIE); }
+
+  isValidToken(): boolean {
+    return isValidJwt(this.getToken(), ACCESS_COOKIE);
   }
 
-  getToken() {
-    return getCookie(TokenService.ACCESS_COOKIE);
+  isValidRefreshToken(): boolean {
+    return isValidJwt(this.getRefreshToken(), REFRESH_COOKIE);
   }
+}
 
-  removeToken() {
-    removeCookie(TokenService.ACCESS_COOKIE);
+// -- native cookie helpers --
+
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(`(?:^|; )${name}=([^;]*)`);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function setCookie(name: string, value: string): void {
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${365 * 86400}`;
+}
+
+function removeCookie(name: string): void {
+  document.cookie = `${name}=; path=/; max-age=0`;
+}
+
+// -- native JWT validation --
+
+function isValidJwt(token: string | null | undefined, cookieName: string): boolean {
+  if (!token) return false;
+  let payload: { exp?: unknown };
+  try {
+    const body = token.split('.')[1];
+    if (!body) { removeCookie(cookieName); return false; }
+    payload = JSON.parse(atob(body));
+  } catch {
+    removeCookie(cookieName);
+    return false;
   }
-
-  saveRefreshToken(token: string) {
-    setCookie(TokenService.REFRESH_COOKIE, token, { expires: 365, path: '/' });
+  if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+    removeCookie(cookieName);
+    return false;
   }
-
-  getRefreshToken() {
-    return getCookie(TokenService.REFRESH_COOKIE);
-  }
-
-  removeRefreshToken() {
-    removeCookie(TokenService.REFRESH_COOKIE);
-  }
-
-  isValidToken() {
-    return this.isValidJwt(this.getToken(), TokenService.ACCESS_COOKIE);
-  }
-
-  isValidRefreshToken() {
-    return this.isValidJwt(
-      this.getRefreshToken(),
-      TokenService.REFRESH_COOKIE,
-    );
-  }
-
-  // Centralized JWT validation. Returns false for any malformed or
-  // expired token instead of throwing, and clears the offending cookie
-  // so a corrupt value cannot keep breaking navigation.
-  private isValidJwt(
-    token: string | null | undefined,
-    cookieName: string,
-  ): boolean {
-    if (!token) return false;
-
-    let payload: JwtPayload;
-    try {
-      payload = jwtDecode<JwtPayload>(token);
-    } catch {
-      this.removeCookie(cookieName);
-      return false;
-    }
-
-    if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
-      this.removeCookie(cookieName);
-      return false;
-    }
-
-    // exp is in epoch seconds; compare against current epoch seconds.
-    return payload.exp > Date.now() / 1000;
-  }
-
-  private removeCookie(name: string) {
-    removeCookie(name, { path: '/' });
-  }
+  return payload.exp > Date.now() / 1000;
 }

@@ -5,7 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
 import { NgIf } from '@angular/common';
 
-import { RequestStatus } from '@shared/models/request-status.model';
+// ponytail: type inlined, was @shared/models/request-status.model
 
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { CustomValidators } from '@shared/utils/validators';
@@ -68,7 +68,7 @@ export class RecoveryFormComponent {
       ],
     },
   );
-  status: RequestStatus = 'init';
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
   errorMessage = '';
   showPassword = false;
   token = '';

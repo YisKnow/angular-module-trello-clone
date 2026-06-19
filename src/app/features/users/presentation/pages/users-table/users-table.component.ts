@@ -5,13 +5,11 @@ import { defer, from } from 'rxjs';
 
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 import { UsersFacade } from '@features/users/application/facades/users.facade';
-import { USERS_PROVIDERS } from '@features/users/users.providers';
 
 @Component({
   selector: 'app-users-table',
   standalone: true,
   imports: [CdkTableModule],
-  providers: [...USERS_PROVIDERS],
   templateUrl: './users-table.component.html',
 })
 export class UsersTableComponent {

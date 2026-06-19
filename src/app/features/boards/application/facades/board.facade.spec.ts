@@ -5,59 +5,48 @@ import { BoardFacade } from '@features/boards/application/facades/board.facade';
 import { Board } from '@boards/domain/entities/board.entity';
 import { Card } from '@boards/domain/entities/card.entity';
 import { List } from '@boards/domain/entities/list.entity';
+import { BOARD_REPOSITORY } from '@boards/domain/repositories/board.repository';
+import { CARD_REPOSITORY } from '@boards/domain/repositories/card.repository';
+import { LIST_REPOSITORY } from '@boards/domain/repositories/list.repository';
 
 const makeCard = (id: string, position: number): Card => ({
-  id,
-  title: `card-${id}`,
-  position,
+  id, title: `card-${id}`, position,
   list: { id: 'l1', title: 'L', position: 1, cards: [] },
 });
 
 const makeList = (id: string, cards: Card[]): List => ({
-  id,
-  title: `list-${id}`,
-  position: 1,
-  cards,
+  id, title: `list-${id}`, position: 1, cards,
 });
 
 const makeBoard = (lists: List[]): Board => ({
-  id: 'b1',
-  title: 'Test Board',
-  backgroundColor: 'green',
-  members: [],
-  lists,
-  cards: [],
+  id: 'b1', title: 'Test Board', backgroundColor: 'green',
+  members: [], lists, cards: [],
 });
 
-const buildFacade = (overrides: Partial<{
-  getBoard: ReturnType<typeof vi.fn>;
-  createBoard: ReturnType<typeof vi.fn>;
-  moveCard: ReturnType<typeof vi.fn>;
-  createCard: ReturnType<typeof vi.fn>;
-  createList: ReturnType<typeof vi.fn>;
-  boardRepository: { getBoard: ReturnType<typeof vi.fn> };
-}> = {}) => {
-  const getBoard = overrides.getBoard ?? vi.fn();
-  const createBoard = overrides.createBoard ?? vi.fn();
-  const moveCard = overrides.moveCard ?? vi.fn().mockResolvedValue(makeCard('c1', 100));
-  const createCard = overrides.createCard ?? vi.fn();
-  const createList = overrides.createList ?? vi.fn();
-  const boardRepository = overrides.boardRepository ?? null;
-
+const buildFacade = (overrides: {
+  getBoard?: ReturnType<typeof vi.fn>;
+  createBoard?: ReturnType<typeof vi.fn>;
+  moveCard?: ReturnType<typeof vi.fn>;
+  createCard?: ReturnType<typeof vi.fn>;
+  createList?: ReturnType<typeof vi.fn>;
+  boardRepository?: { getBoard?: ReturnType<typeof vi.fn> };
+} = {}) => {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
-      {
-        provide: BoardFacade,
-        useValue: new BoardFacade(
-          { execute: getBoard } as never,
-          { execute: createBoard } as never,
-          { execute: moveCard } as never,
-          { execute: createCard } as never,
-          { execute: createList } as never,
-          boardRepository as never,
-        ),
-      },
+      BoardFacade,
+      { provide: BOARD_REPOSITORY, useValue: {
+        getBoard: overrides.getBoard ?? vi.fn().mockResolvedValue(makeBoard([])),
+        createBoard: overrides.createBoard ?? vi.fn(),
+        ...overrides.boardRepository,
+      }},
+      { provide: CARD_REPOSITORY, useValue: {
+        update: overrides.moveCard ?? vi.fn().mockResolvedValue(makeCard('c1', 100)),
+        create: overrides.createCard ?? vi.fn(),
+      }},
+      { provide: LIST_REPOSITORY, useValue: {
+        create: overrides.createList ?? vi.fn(),
+      }},
     ],
   });
   return TestBed.inject(BoardFacade);
@@ -70,10 +59,6 @@ describe('BoardFacade', () => {
     facade = buildFacade();
   });
 
-  // -----------------------------------------------------------------------
-  // loadBoard
-  // -----------------------------------------------------------------------
-
   it('loadBoard sets board, status=success, and backgroundColor', async () => {
     const board = makeBoard([makeList('l1', [])]);
     const f = buildFacade({ getBoard: vi.fn().mockResolvedValue(board) });
@@ -83,12 +68,11 @@ describe('BoardFacade', () => {
     expect(f.backgroundColor()).toBe('green');
   });
 
-  it('loadBoard sets status=loading during the call and success after', async () => {
+  it('loadBoard sets status=loading then success', async () => {
     let resolve: (b: Board) => void;
     const promise = new Promise<Board>((r) => { resolve = r; });
     const f = buildFacade({ getBoard: vi.fn().mockReturnValue(promise) });
     void f.loadBoard('b1');
-    // Status should be 'loading' synchronously.
     expect(f.status()).toBe('loading');
     resolve!(makeBoard([]));
     await promise;
@@ -102,97 +86,64 @@ describe('BoardFacade', () => {
     expect(f.board()).toBeNull();
   });
 
-  // -----------------------------------------------------------------------
-  // backgroundColor computed
-  // -----------------------------------------------------------------------
-
   it('backgroundColor defaults to sky when no board is loaded', () => {
     expect(facade.backgroundColor()).toBe('sky');
   });
 
-  // -----------------------------------------------------------------------
-  // moveCard
-  // -----------------------------------------------------------------------
-
-  it('moveCard delegates to the use case and reorders optimistically', async () => {
+  it('moveCard delegates to the repository and reorders optimistically', async () => {
     const list1 = makeList('l1', [makeCard('c1', 100), makeCard('c2', 200)]);
     const list2 = makeList('l2', []);
     const board = makeBoard([list1, list2]);
     const moveCard = vi.fn().mockResolvedValue(makeCard('c1', 100));
-    const f = buildFacade({ moveCard });
-    f['getBoardUseCase'] = {
-      execute: vi.fn().mockResolvedValue(board),
-    } as never;
+    const f = buildFacade({ getBoard: vi.fn().mockResolvedValue(board), moveCard });
     await f.loadBoard('b1');
-
     const card = board.lists[0].cards[0];
     await f.moveCard(card, 0, list2.id);
-
-    expect(moveCard).toHaveBeenCalledWith(card.id, 0, list2.id);
+    expect(moveCard).toHaveBeenCalledWith(card.id, { position: 0, listId: list2.id });
   });
 
-  it('moveCard rolls back to server data when use case rejects', async () => {
+  it('moveCard rolls back to server data when the API rejects', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const list1 = makeList('l1', [makeCard('c1', 100)]);
     const refreshed = makeBoard([makeList('l1', [makeCard('c1', 200)])]);
     const f = buildFacade({
       moveCard: vi.fn().mockRejectedValue(new Error('boom')),
+      getBoard: vi.fn().mockResolvedValue(makeBoard([list1])),
       boardRepository: { getBoard: vi.fn().mockResolvedValue(refreshed) },
     });
-    f['getBoardUseCase'] = {
-      execute: vi.fn().mockResolvedValue(makeBoard([list1])),
-    } as never;
     await f.loadBoard('b1');
-
     const card = f.board()!.lists[0].cards[0];
     await expect(f.moveCard(card, 0, list1.id)).rejects.toBeDefined();
-    // After rollback, the card position should reflect the server data.
     expect(f.board()?.lists[0].cards[0].position).toBe(200);
     vi.mocked(console.error).mockRestore();
   });
-
-  // -----------------------------------------------------------------------
-  // createCard
-  // -----------------------------------------------------------------------
 
   it('createCard appends a new card to the target list and closes the form', async () => {
     const list = makeList('l1', []);
     const board = makeBoard([list]);
     const newCard = makeCard('c1', 65535);
     const f = buildFacade({
+      getBoard: vi.fn().mockResolvedValue(board),
       createCard: vi.fn().mockResolvedValue(newCard),
     });
-    f['getBoardUseCase'] = {
-      execute: vi.fn().mockResolvedValue(board),
-    } as never;
     await f.loadBoard('b1');
-
     await f.createCard(list, 'New Card');
     const updated = f.board();
     expect(updated!.lists[0].cards).toHaveLength(1);
     expect(updated!.lists[0].cards[0].id).toBe('c1');
   });
 
-  // -----------------------------------------------------------------------
-  // createList
-  // -----------------------------------------------------------------------
-
   it('createList appends a new list to the board', async () => {
     const newList: List = { id: 'l2', title: 'New', position: 65535, cards: [] };
-    const f = buildFacade({ createList: vi.fn().mockResolvedValue(newList) });
-    f['getBoardUseCase'] = {
-      execute: vi.fn().mockResolvedValue(makeBoard([makeList('l1', [])])),
-    } as never;
+    const f = buildFacade({
+      getBoard: vi.fn().mockResolvedValue(makeBoard([makeList('l1', [])])),
+      createList: vi.fn().mockResolvedValue(newList),
+    });
     await f.loadBoard('b1');
-
     await f.createList('New');
     expect(f.board()!.lists).toHaveLength(2);
     expect(f.board()!.lists[1].title).toBe('New');
   });
-
-  // -----------------------------------------------------------------------
-  // UI state — showCardForm
-  // -----------------------------------------------------------------------
 
   it('openCardForm / isCardFormOpen toggle the per-list card form', () => {
     expect(facade.isCardFormOpen('l1')).toBe(false);
@@ -202,15 +153,9 @@ describe('BoardFacade', () => {
     expect(facade.isCardFormOpen('l1')).toBe(false);
   });
 
-  // -----------------------------------------------------------------------
-  // resetBackgroundColor
-  // -----------------------------------------------------------------------
-
   it('resetBackgroundColor clears the board signal', async () => {
     const board = makeBoard([makeList('l1', [])]);
-    const f = buildFacade({
-      getBoard: vi.fn().mockResolvedValue(board),
-    });
+    const f = buildFacade({ getBoard: vi.fn().mockResolvedValue(board) });
     await f.loadBoard('b1');
     expect(f.board()).not.toBeNull();
     f.resetBackgroundColor();

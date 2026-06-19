@@ -10,7 +10,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
 
-import { RequestStatus } from '@shared/models/request-status.model';
+// ponytail: type inlined, was @shared/models/request-status.model
 
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
@@ -49,7 +49,7 @@ export class ForgotPasswordFormComponent {
     { initialValue: null },
   );
 
-  status: RequestStatus = 'init';
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
   errorMessage = '';
   emailSent = false;
 

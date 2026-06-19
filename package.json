@@ -26,9 +26,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/user-event": "^14.6.1",
-    "jwt-decode": "^4.0.0",
-    "rxjs": "~7.8.2",
-    "typescript-cookie": "^1.0.6"
+    "rxjs": "~7.8.2"
   },
   "devDependencies": {
     "@angular-eslint/builder": "22.0.0",
