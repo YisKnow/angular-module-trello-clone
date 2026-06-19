@@ -24,6 +24,10 @@ import { firstValueFrom } from 'rxjs';
 
 import { BACKGROUNDS } from '@shared/utils/colors.utils';
 import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogResult,
+} from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { Card } from '@boards/domain/entities/card.entity';
 import { List } from '@boards/domain/entities/list.entity';
 import { BoardFacade } from '@boards/application/facades/board.facade';
@@ -135,6 +139,51 @@ export class BoardPage implements OnDestroy {
       }
     } catch {
       /* dialog dismissed without data */
+    }
+  }
+
+  // ponytail: confirm-then-delete pattern. The card/list is removed
+  // locally because the fake Trello API has no delete endpoints — see
+  // BoardFacade.deleteCardLocally/deleteListLocally.
+  async confirmDeleteCard(card: Card, list: List) {
+    const confirmed = await this.askConfirm({
+      title: 'Delete card?',
+      message: `“${card.title}” will be removed from this list. This can't be undone.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    });
+    if (confirmed) {
+      this.boardFacade.deleteCardLocally(card.id);
+    }
+  }
+
+  async confirmDeleteList(list: List) {
+    const cardCount = list.cards.length;
+    const confirmed = await this.askConfirm({
+      title: 'Delete list?',
+      message: `“${list.title}”${cardCount ? ` and its ${cardCount} card${cardCount === 1 ? '' : 's'}` : ''} will be removed. This can't be undone.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    });
+    if (confirmed) {
+      this.boardFacade.deleteListLocally(list.id);
+    }
+  }
+
+  private async askConfirm(data: {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    destructive?: boolean;
+  }): Promise<boolean> {
+    const ref = this.dialog.open<ConfirmDialogResult>(ConfirmDialogComponent, {
+      data,
+    });
+    try {
+      const result = await firstValueFrom(ref.closed);
+      return !!result?.confirmed;
+    } catch {
+      return false;
     }
   }
 

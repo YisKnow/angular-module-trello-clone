@@ -102,3 +102,62 @@ test.describe('Delete board', () => {
     expect(deleteCalled).toBe(true);
   });
 });
+
+test.describe('Confirm dialog (delete card / list)', () => {
+  test('confirming a card delete removes the card locally', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/login');
+    await page.getByLabel('Email').fill('test@example.com');
+    await page.getByLabel('Password').fill('password123');
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await expect(page).toHaveURL(/\/app\/boards/);
+
+    await page.getByText('My roadmap').click();
+    await expect(page).toHaveURL(/\/app\/boards\/b1/);
+    await expect(page.getByText('First card')).toBeVisible();
+
+    await page.getByTestId('delete-card-c1').click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByText(/delete card\?/i)).toBeVisible();
+    await page.getByTestId('confirm-ok').click();
+
+    await expect(page.getByText('First card')).not.toBeVisible();
+  });
+
+  test('cancelling a card delete keeps the card', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/login');
+    await page.getByLabel('Email').fill('test@example.com');
+    await page.getByLabel('Password').fill('password123');
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await expect(page).toHaveURL(/\/app\/boards/);
+
+    await page.getByText('My roadmap').click();
+    await expect(page).toHaveURL(/\/app\/boards\/b1/);
+
+    await page.getByTestId('delete-card-c1').click();
+    await page.getByTestId('confirm-cancel').click();
+
+    await expect(page.getByText('First card')).toBeVisible();
+  });
+
+  test('confirming a list delete removes the list and its cards', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/login');
+    await page.getByLabel('Email').fill('test@example.com');
+    await page.getByLabel('Password').fill('password123');
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await expect(page).toHaveURL(/\/app\/boards/);
+
+    await page.getByText('My roadmap').click();
+    await expect(page).toHaveURL(/\/app\/boards\/b1/);
+
+    await page.getByTestId('delete-list-l2').click();
+    await expect(page.getByText(/delete list\?/i)).toBeVisible();
+    await page.getByTestId('confirm-ok').click();
+
+    await expect(page.getByText('Done')).not.toBeVisible();
+    // The "Todo" list should still be there.
+    await expect(page.getByText('Todo')).toBeVisible();
+  });
+});

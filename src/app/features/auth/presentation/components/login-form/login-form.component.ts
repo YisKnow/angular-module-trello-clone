@@ -10,10 +10,9 @@ import {
 } from '@angular/forms/signals';
 import { Router, ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
+import { Subject } from 'rxjs';
 
-// ponytail: type inlined, was @shared/models/request-status.model
-
+import { toAsyncSignal, errorMessageOf } from '@shared/utils/async-signal';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 
 @Component({
@@ -30,32 +29,9 @@ export class LoginFormComponent {
   private readonly queryParamMap = toSignal(this.route.queryParamMap);
   private readonly loginSubject = new Subject<{ email: string; password: string }>();
 
-  readonly loginResult = toSignal(
-    this.loginSubject.pipe(
-      exhaustMap(({ email, password }) =>
-        from(this.authFacade.login(email, password)).pipe(
-          tap({
-            next: () => {
-              this.status = 'success';
-              this.errorMessage = '';
-              this.router.navigate(['/app']);
-            },
-            error: (err) => {
-              this.status = 'failed';
-              this.errorMessage =
-                err?.error?.message || 'Credentials are invalid. Please try again.';
-            },
-          }),
-          catchError(() => of(null)),
-        ),
-      ),
-    ),
-    { initialValue: null },
-  );
-
   showPassword = false;
-  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
   errorMessage = '';
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
 
   readonly form = form(
     signal<{ email: string; password: string }>({ email: '', password: '' }),
@@ -68,6 +44,7 @@ export class LoginFormComponent {
     {
       submission: {
         action: async () => {
+          this.errorMessage = '';
           this.status = 'loading';
           const { email, password } = this.form().value();
           this.loginSubject.next({ email, password });
@@ -75,6 +52,21 @@ export class LoginFormComponent {
       },
     },
   );
+
+  // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
+  private readonly loginAsync = toAsyncSignal<{ email: string; password: string }, unknown>({
+    subject: this.loginSubject,
+    action: ({ email, password }) => this.authFacade.login(email, password),
+    onStart: () => { this.status = 'loading'; },
+    onSuccess: () => {
+      this.status = 'success';
+      this.router.navigate(['/app']);
+    },
+    onError: (err) => {
+      this.status = 'failed';
+      this.errorMessage = errorMessageOf(err, 'Credentials are invalid. Please try again.');
+    },
+  });
 
   constructor() {
     // Apply pre-filled email from query params on first signal emission

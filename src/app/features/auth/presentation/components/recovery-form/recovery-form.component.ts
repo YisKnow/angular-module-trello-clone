@@ -2,11 +2,10 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
+import { Subject } from 'rxjs';
 import { NgIf } from '@angular/common';
 
-// ponytail: type inlined, was @shared/models/request-status.model
-
+import { toAsyncSignal, errorMessageOf } from '@shared/utils/async-signal';
 import { CustomValidators } from '@shared/utils/validators';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 
@@ -31,29 +30,6 @@ export class RecoveryFormComponent {
     newPassword: string;
   }>();
 
-  readonly changePasswordResult = toSignal(
-    this.changePasswordSubject.pipe(
-      exhaustMap(({ token, newPassword }) =>
-        from(this.authFacade.changePassword(token, newPassword)).pipe(
-          tap({
-            next: () => {
-              this.status = 'success';
-              this.errorMessage = '';
-              this.router.navigate(['/login']);
-            },
-            error: (err) => {
-              this.status = 'failed';
-              this.errorMessage =
-                err?.error?.message || 'Password change failed. Please try again.';
-            },
-          }),
-          catchError(() => of(null)),
-        ),
-      ),
-    ),
-    { initialValue: null },
-  );
-
   form = this.formBuilder.nonNullable.group(
     {
       newPassword: ['', [Validators.minLength(8), Validators.required]],
@@ -65,10 +41,10 @@ export class RecoveryFormComponent {
       ],
     },
   );
-  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
   errorMessage = '';
   showPassword = false;
   token = '';
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
 
   constructor() {
     // Apply token from query params on first signal emission
@@ -82,8 +58,24 @@ export class RecoveryFormComponent {
     });
   }
 
+  // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
+  private readonly changePasswordAsync = toAsyncSignal<{ token: string; newPassword: string }, void>({
+    subject: this.changePasswordSubject,
+    action: ({ token, newPassword }) => this.authFacade.changePassword(token, newPassword),
+    onStart: () => { this.status = 'loading'; },
+    onSuccess: () => {
+      this.status = 'success';
+      this.router.navigate(['/login']);
+    },
+    onError: (err) => {
+      this.status = 'failed';
+      this.errorMessage = errorMessageOf(err, 'Password change failed. Please try again.');
+    },
+  });
+
   recovery() {
     if (this.form.valid) {
+      this.errorMessage = '';
       this.changePasswordSubject.next({
         token: this.token,
         newPassword: this.form.getRawValue().newPassword,

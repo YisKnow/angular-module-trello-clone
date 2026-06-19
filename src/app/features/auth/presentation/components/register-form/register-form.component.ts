@@ -1,12 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
+import { Subject } from 'rxjs';
 import { NgIf } from '@angular/common';
 
-// ponytail: type inlined, was @shared/models/request-status.model
-
+import { toAsyncSignal, errorMessageOf } from '@shared/utils/async-signal';
 import { CustomValidators } from '@shared/utils/validators';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 
@@ -31,56 +29,6 @@ export class RegisterFormComponent {
   }>();
   private readonly validateSubject = new Subject<{ email: string }>();
 
-  readonly registerResult = toSignal(
-    this.registerSubject.pipe(
-      exhaustMap(({ name, email, password }) =>
-        from(this.authFacade.registerAndLogin(name, email, password)).pipe(
-          tap({
-            next: () => {
-              this.status = 'success';
-              this.errorMessage = '';
-              this.router.navigate(['/app/boards']);
-            },
-            error: (err) => {
-              this.status = 'failed';
-              this.errorMessage =
-                err?.error?.message || 'Registration failed. Please try again.';
-            },
-          }),
-          catchError(() => of(null)),
-        ),
-      ),
-    ),
-    { initialValue: null },
-  );
-
-  readonly validateResult = toSignal(
-    this.validateSubject.pipe(
-      exhaustMap(({ email }) =>
-        from(this.authFacade.isAvailable(email)).pipe(
-          tap({
-            next: (isAvailable) => {
-              this.statusUser = 'success';
-              if (isAvailable) {
-                this.showRegister = true;
-                this.form.controls.email.setValue(email);
-              } else {
-                this.router.navigate(['/login'], {
-                  queryParams: { email },
-                });
-              }
-            },
-            error: () => {
-              this.statusUser = 'failed';
-            },
-          }),
-          catchError(() => of(null)),
-        ),
-      ),
-    ),
-    { initialValue: null },
-  );
-
   formUser = this.formBuilder.nonNullable.group({
     email: ['', [Validators.email, Validators.required]],
   });
@@ -98,14 +46,51 @@ export class RegisterFormComponent {
       ],
     },
   );
-  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
-  statusUser: 'init' | 'loading' | 'success' | 'failed' = 'init';
   errorMessage = '';
   showPassword = false;
   showRegister = false;
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
+  statusUser: 'init' | 'loading' | 'success' | 'failed' = 'init';
+
+  // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
+  private readonly registerAsync = toAsyncSignal<{ name: string; email: string; password: string }, unknown>({
+    subject: this.registerSubject,
+    action: ({ name, email, password }) =>
+      this.authFacade.registerAndLogin(name, email, password),
+    onStart: () => { this.status = 'loading'; },
+    onSuccess: () => {
+      this.status = 'success';
+      this.router.navigate(['/app/boards']);
+    },
+    onError: (err) => {
+      this.status = 'failed';
+      this.errorMessage = errorMessageOf(err, 'Registration failed. Please try again.');
+    },
+  });
+
+  // ponytail: status for the email-availability probe; not surfaced as a
+  // signal because the only signal effect is `showRegister` / navigation.
+  private readonly validateAsync = toAsyncSignal<{ email: string }, boolean>({
+    subject: this.validateSubject,
+    action: ({ email }) => this.authFacade.isAvailable(email),
+    onStart: () => { this.statusUser = 'loading'; },
+    onSuccess: (isAvailable, { email }) => {
+      this.statusUser = 'success';
+      if (isAvailable) {
+        this.showRegister = true;
+        this.form.controls.email.setValue(email);
+      } else {
+        this.router.navigate(['/login'], { queryParams: { email } });
+      }
+    },
+    onError: () => {
+      this.statusUser = 'failed';
+    },
+  });
 
   register() {
     if (this.form.valid) {
+      this.errorMessage = '';
       this.status = 'loading';
       const { name, email, password } = this.form.getRawValue();
       this.registerSubject.next({ name, email, password });
@@ -117,8 +102,7 @@ export class RegisterFormComponent {
   validateUser() {
     if (this.formUser.valid) {
       this.statusUser = 'loading';
-      const { email } = this.formUser.getRawValue();
-      this.validateSubject.next({ email });
+      this.validateSubject.next({ email: this.formUser.getRawValue().email });
     } else {
       this.formUser.markAllAsTouched();
     }

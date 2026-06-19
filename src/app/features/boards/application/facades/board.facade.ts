@@ -140,6 +140,31 @@ export class BoardFacade {
     this._board.set({ ...current, lists: [...current.lists, { ...list, cards: [] }] });
   }
 
+  // ponytail: local-only deletion (no API). Used by the board page's
+  // confirm dialog flow. The next time the board is fetched from the
+  // server, the deleted items will reappear — that's acceptable for
+  // this scope (the fake Trello API has no delete endpoints).
+  deleteCardLocally(cardId: Card['id']): void {
+    const current = this._board();
+    if (!current) return;
+    this._board.set({
+      ...current,
+      lists: current.lists.map((l) => ({
+        ...l,
+        cards: l.cards.filter((c) => c.id !== cardId),
+      })),
+    });
+  }
+
+  deleteListLocally(listId: string): void {
+    const current = this._board();
+    if (!current) return;
+    this._board.set({
+      ...current,
+      lists: current.lists.filter((l) => l.id !== listId),
+    });
+  }
+
   openCardForm(listId: string): void { this._openCardFormListId.set(listId); }
   closeCardForm(): void { this._openCardFormListId.set(null); }
   isCardFormOpen(listId: string): boolean { return this._openCardFormListId() === listId; }

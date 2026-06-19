@@ -7,11 +7,9 @@ import {
   FormField,
   FormRoot,
 } from '@angular/forms/signals';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
+import { Subject } from 'rxjs';
 
-// ponytail: type inlined, was @shared/models/request-status.model
-
+import { toAsyncSignal, errorMessageOf } from '@shared/utils/async-signal';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 
 @Component({
@@ -25,32 +23,9 @@ export class ForgotPasswordFormComponent {
 
   private readonly recoverySubject = new Subject<{ email: string }>();
 
-  readonly recoveryResult = toSignal(
-    this.recoverySubject.pipe(
-      exhaustMap(({ email }) =>
-        from(this.authFacade.recovery(email)).pipe(
-          tap({
-            next: () => {
-              this.status = 'success';
-              this.errorMessage = '';
-              this.emailSent = true;
-            },
-            error: (err) => {
-              this.status = 'failed';
-              this.errorMessage =
-                err?.error?.message || 'Could not send recovery link. Please try again.';
-            },
-          }),
-          catchError(() => of(null)),
-        ),
-      ),
-    ),
-    { initialValue: null },
-  );
-
-  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
   errorMessage = '';
   emailSent = false;
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
 
   readonly form = form(
     signal<{ email: string }>({ email: '' }),
@@ -61,10 +36,26 @@ export class ForgotPasswordFormComponent {
     {
       submission: {
         action: async () => {
+          this.errorMessage = '';
           this.status = 'loading';
           this.recoverySubject.next({ email: this.form().value().email });
         },
       },
     },
   );
+
+  // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
+  private readonly recoveryAsync = toAsyncSignal<{ email: string }, void>({
+    subject: this.recoverySubject,
+    action: ({ email }) => this.authFacade.recovery(email),
+    onStart: () => { this.status = 'loading'; },
+    onSuccess: () => {
+      this.status = 'success';
+      this.emailSent = true;
+    },
+    onError: (err) => {
+      this.status = 'failed';
+      this.errorMessage = errorMessageOf(err, 'Could not send recovery link. Please try again.');
+    },
+  });
 }

@@ -7,9 +7,9 @@ import {
   FormField,
   FormRoot,
 } from '@angular/forms/signals';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
+import { Subject } from 'rxjs';
 
+import { toAsyncSignal, errorMessageOf } from '@shared/utils/async-signal';
 import { Colors } from '@shared/models/colors.model';
 
 import { ButtonComponent } from '@shared/components/button/button.component';
@@ -29,42 +29,10 @@ export class BoardFormComponent {
   private readonly boardFacade = inject(BoardFacade);
   private readonly router = inject(Router);
 
-  private readonly createBoardSubject = new Subject<{
-    title: string;
-    backgroundColor: Colors;
-  }>();
+  private readonly createBoardSubject = new Subject<BoardFormModel>();
 
   readonly errorMessage = signal<string>('');
   readonly submitting = signal(false);
-
-  readonly createBoardResult = toSignal(
-    this.createBoardSubject.pipe(
-      exhaustMap(({ title, backgroundColor }) => {
-        this.submitting.set(true);
-        this.errorMessage.set('');
-        return from(this.boardFacade.createBoard(title, backgroundColor)).pipe(
-          tap({
-            next: (board) => {
-              this.submitting.set(false);
-              this.closeOverlay.emit(false);
-              this.router.navigate(['/app/boards', board.id]);
-            },
-            error: (err: { error?: { message?: string }; status?: number }) => {
-              this.submitting.set(false);
-              this.errorMessage.set(
-                err?.error?.message ||
-                  (err?.status === 401
-                    ? 'Your session expired. Please log in again.'
-                    : 'Could not create the board. Please try again.'),
-              );
-            },
-          }),
-          catchError(() => of(null)),
-        );
-      }),
-    ),
-    { initialValue: null },
-  );
 
   readonly form = form(
     signal<BoardFormModel>({ title: '', backgroundColor: 'sky' }),
@@ -75,9 +43,32 @@ export class BoardFormComponent {
     {
       submission: {
         action: async () => {
+          this.errorMessage.set('');
           this.createBoardSubject.next(this.form().value());
         },
       },
     },
   );
+
+  // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
+  private readonly createBoardAsync = toAsyncSignal<BoardFormModel, { id: string }>({
+    subject: this.createBoardSubject,
+    action: ({ title, backgroundColor }) => this.boardFacade.createBoard(title, backgroundColor),
+    onStart: () => this.submitting.set(true),
+    onSuccess: (board) => {
+      this.submitting.set(false);
+      this.closeOverlay.emit(false);
+      this.router.navigate(['/app/boards', board.id]);
+    },
+    onError: (err: unknown) => {
+      this.submitting.set(false);
+      const e = err as { error?: { message?: string }; status?: number };
+      this.errorMessage.set(
+        e?.error?.message ||
+          (e?.status === 401
+            ? 'Your session expired. Please log in again.'
+            : 'Could not create the board. Please try again.'),
+      );
+    },
+  });
 }
