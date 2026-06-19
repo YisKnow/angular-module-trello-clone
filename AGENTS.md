@@ -14,6 +14,9 @@ npm run typecheck       # tsc --noEmit -p tsconfig.app.json
 npm run build           # production build to dist/trello-auth
 npm run format          # prettier --write .
 npm run format:check    # prettier --check .
+npm run e2e             # Playwright E2E suite
+npm run e2e:ui          # Playwright UI mode
+npm run e2e:install     # Install Chromium for Playwright
 ```
 
 Node: see `.nvmrc`. Package manager: npm.
