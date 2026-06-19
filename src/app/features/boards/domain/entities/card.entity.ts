@@ -5,5 +5,7 @@ export interface Card {
   title: string;
   description?: string;
   position: number;
-  list: List;
+  // ponytail: only top-level cards (board.cards) carry the list ref;
+  // cards nested inside a list inherit the parent reference.
+  list?: List;
 }

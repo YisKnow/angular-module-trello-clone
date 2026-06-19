@@ -1,0 +1,55 @@
+- generic [ref=e4]:
+  - navigation [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - link "logo" [ref=e10] [cursor=pointer]:
+          - /url: /app
+          - img "logo" [ref=e11]
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - button "Boards keyboard_arrow_down" [ref=e16]:
+              - generic [ref=e17]:
+                - generic [ref=e18]: Boards
+                - generic [ref=e19]: keyboard_arrow_down
+          - listitem [ref=e20]:
+            - link "Users" [ref=e21] [cursor=pointer]:
+              - /url: /app/users
+          - listitem [ref=e22]:
+            - button "Create keyboard_arrow_down" [ref=e24]:
+              - generic [ref=e25]:
+                - generic [ref=e26]: Create
+                - generic [ref=e27]: keyboard_arrow_down
+      - generic [ref=e29]:
+        - button "notifications" [ref=e30]:
+          - generic [ref=e31]: notifications
+        - button "info" [ref=e32]:
+          - generic [ref=e33]: info
+        - button "user photo" [ref=e34]:
+          - img "user photo" [ref=e35]
+  - generic [ref=e38]:
+    - heading "Board 1" [level=2] [ref=e40]
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - heading "ToDo" [level=3] [ref=e44]
+        - generic [ref=e45]:
+          - generic [ref=e46] [cursor=pointer]: Buy a unicorn
+          - generic [ref=e47] [cursor=pointer]: follow @nicobytes in Twitter
+          - generic [ref=e48] [cursor=pointer]: xd
+          - generic [ref=e49] [cursor=pointer]: xd
+        - button "Add a card" [ref=e52]
+      - generic [ref=e53]:
+        - heading "Doing" [level=3] [ref=e55]
+        - generic [ref=e56]:
+          - generic [ref=e57] [cursor=pointer]: Make dishes
+          - generic [ref=e58] [cursor=pointer]: Watch Angular Path in Platzi
+          - generic [ref=e59] [cursor=pointer]: aaaa
+          - generic [ref=e60] [cursor=pointer]: card
+          - generic [ref=e61] [cursor=pointer]: cardi
+        - button "Add a card" [ref=e64]
+      - generic [ref=e65]:
+        - heading "Done" [level=3] [ref=e67]
+        - generic [ref=e68]:
+          - generic [ref=e69] [cursor=pointer]: Play video games
+          - generic [ref=e70] [cursor=pointer]: Watch NestJS Path in Platzi
+        - button "Add a card" [ref=e73]
+      - button "Add another list" [ref=e76]

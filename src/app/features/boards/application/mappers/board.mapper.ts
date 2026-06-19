@@ -19,9 +19,10 @@ export const BoardMapper = {
       id: dto.id,
       title: dto.title,
       backgroundColor: dto.backgroundColor,
-      members: dto.members.map(toUser),
+      // ponytail: API may omit members/cards; cards live inside lists.
+      members: (dto.members ?? []).map(toUser),
       lists: dto.lists.map(toList),
-      cards: dto.cards.map(toCard),
+      cards: (dto.cards ?? []).map(toCard),
     };
   },
   toSummary(dto: BoardSummaryDto): BoardSummary {
@@ -51,14 +52,15 @@ export const CardMapper = {
       title: dto.title,
       description: dto.description,
       position: dto.position,
-      // Build a placeholder list reference; full list reassembly
-      // happens in BoardMapper.toDomain once the full board is loaded.
-      list: {
-        id: dto.list.id,
-        title: dto.list.title,
-        position: dto.list.position,
-        cards: [],
-      },
+      // ponytail: cards nested inside lists omit the list field.
+      list: dto.list
+        ? {
+            id: dto.list.id,
+            title: dto.list.title,
+            position: dto.list.position,
+            cards: [],
+          }
+        : undefined,
     };
   },
 };
