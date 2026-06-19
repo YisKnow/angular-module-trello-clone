@@ -1,4 +1,0 @@
-[      76ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/Users/jesusalejandroatao/Documents/Cursos/Platzi/curso-angular-auth-update/.angular/cache/22.0.3/trello-auth/vite/deps/chunk-N3JMXNJE.js?v=d9d3b588:11600
-[     222ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4200/login:0
-[   93960ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ https://api.lorem.space/image/face?w=480&h=480&r=7900:0
-[  180055ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/Users/jesusalejandroatao/Documents/Cursos/Platzi/curso-angular-auth-update/.angular/cache/22.0.3/trello-auth/vite/deps/chunk-N3JMXNJE.js?v=d9d3b588:11600
