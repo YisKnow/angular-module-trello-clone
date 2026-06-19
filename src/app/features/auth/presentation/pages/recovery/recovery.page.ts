@@ -8,12 +8,7 @@ import { BackgroundComponent } from '@features/auth/presentation/components/back
 @Component({
   selector: 'app-recovery',
   standalone: true,
-  imports: [
-    RouterLink,
-    NgOptimizedImage,
-    RecoveryFormComponent,
-    BackgroundComponent,
-  ],
+  imports: [RouterLink, NgOptimizedImage, RecoveryFormComponent, BackgroundComponent],
   templateUrl: './recovery.page.html',
 })
 export class RecoveryPage {}

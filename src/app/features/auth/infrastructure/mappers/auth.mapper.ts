@@ -1,17 +1,21 @@
+// Mappers for the auth feature.
+//
+// Pure functions — no Angular, no HTTP. They translate wire DTOs
+// (declared in infrastructure/dtos) into the domain entities declared
+// in domain/entities.
+
 import { User } from '../../domain/entities/user.entity';
+import { AuthTokens } from '../../application/contracts/auth-contracts';
 import {
-  AuthTokens,
-} from '../../domain/repositories/auth.repository';
-import {
+  ChangePasswordRequestDto,
   LoginRequestDto,
   LoginResponseDto,
+  RecoveryRequestDto,
   RegisterRequestDto,
-  UserDto,
   RefreshTokenRequestDto,
+  UserDto,
 } from '../dtos/auth.dto';
 
-// Pure mapper functions. No Angular, no HttpClient — easy to test
-// in isolation, easy to swap when the API contract changes.
 export const AuthMapper = {
   toTokens(dto: LoginResponseDto): AuthTokens {
     return {
@@ -36,15 +40,19 @@ export const AuthMapper = {
     return { email, password };
   },
 
-  toRegisterRequest(
-    name: string,
-    email: string,
-    password: string,
-  ): RegisterRequestDto {
+  toRegisterRequest(name: string, email: string, password: string): RegisterRequestDto {
     return { name, email, password };
   },
 
   toRefreshRequest(refreshToken: string): RefreshTokenRequestDto {
     return { refreshToken };
+  },
+
+  toRecoveryRequest(email: string): RecoveryRequestDto {
+    return { email };
+  },
+
+  toChangePasswordRequest(token: string, newPassword: string): ChangePasswordRequestDto {
+    return { token, newPassword };
   },
 };

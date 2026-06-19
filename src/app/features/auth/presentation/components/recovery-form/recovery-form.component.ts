@@ -12,10 +12,7 @@ import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 @Component({
   selector: 'app-recovery-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgIf,
-  ],
+  imports: [ReactiveFormsModule, NgIf],
   templateUrl: './recovery-form.component.html',
 })
 export class RecoveryFormComponent {
@@ -36,9 +33,7 @@ export class RecoveryFormComponent {
       confirmPassword: ['', [Validators.required]],
     },
     {
-      validators: [
-        CustomValidators.MatchValidator('newPassword', 'confirmPassword'),
-      ],
+      validators: [CustomValidators.MatchValidator('newPassword', 'confirmPassword')],
     },
   );
   errorMessage = '';
@@ -59,10 +54,15 @@ export class RecoveryFormComponent {
   }
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly _changePasswordAsync = toAsyncSignal<{ token: string; newPassword: string }, void>({
+  private readonly _changePasswordAsync = toAsyncSignal<
+    { token: string; newPassword: string },
+    void
+  >({
     subject: this.changePasswordSubject,
     action: ({ token, newPassword }) => this.authFacade.changePassword(token, newPassword),
-    onStart: () => { this.status = 'loading'; },
+    onStart: () => {
+      this.status = 'loading';
+    },
     onSuccess: () => {
       this.status = 'success';
       this.router.navigate(['/login']);

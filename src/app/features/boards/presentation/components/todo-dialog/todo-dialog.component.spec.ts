@@ -26,9 +26,7 @@ const dialogRefStore: { close: ReturnType<typeof vi.fn> } = { close: vi.fn() };
 class TodoDialogHostComponent {
   card: Card;
 
-  constructor(
-    @Inject(DIALOG_DATA) data: { card: Card },
-  ) {
+  constructor(@Inject(DIALOG_DATA) data: { card: Card }) {
     this.card = data.card;
   }
 
@@ -44,9 +42,7 @@ class TodoDialogHostComponent {
 describe('TodoDialogComponent (host behavior)', () => {
   it('exposes the card injected via DIALOG_DATA', async () => {
     const { fixture } = await render(TodoDialogHostComponent, {
-      providers: [
-        { provide: DIALOG_DATA, useValue: { card: makeCard() } },
-      ],
+      providers: [{ provide: DIALOG_DATA, useValue: { card: makeCard() } }],
     });
     expect(fixture.componentInstance.card.id).toBe('c1');
     expect(fixture.componentInstance.card.title).toBe('Test card');

@@ -2,7 +2,9 @@
   <h2 class="text-lg font-semibold text-gray-900 text-center mb-6">Create your account</h2>
   <form [formGroup]="formUser" novalidate class="space-y-5" (ngSubmit)="validateUser()">
     <div>
-      <label for="reg-step1-email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+      <label for="reg-step1-email" class="block text-sm font-medium text-gray-700 mb-1.5"
+        >Email</label
+      >
       <input
         id="reg-step1-email"
         formControlName="email"
@@ -12,11 +14,20 @@
         class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent"
       />
       <div *ngIf="formUser.controls.email.touched && formUser.controls.email.invalid">
-        <p *ngIf="formUser.controls.email.hasError('required')" class="text-red-500 text-xs mt-1">This field is required</p>
-        <p *ngIf="formUser.controls.email.hasError('email')" class="text-red-500 text-xs mt-1">Please enter a valid email address</p>
+        <p *ngIf="formUser.controls.email.hasError('required')" class="text-red-500 text-xs mt-1">
+          This field is required
+        </p>
+        <p *ngIf="formUser.controls.email.hasError('email')" class="text-red-500 text-xs mt-1">
+          Please enter a valid email address
+        </p>
       </div>
     </div>
-    <button type="submit" class="w-full rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2.5 transition-colors duration-150">Continue</button>
+    <button
+      type="submit"
+      class="w-full rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2.5 transition-colors duration-150"
+    >
+      Continue
+    </button>
   </form>
 </ng-container>
 
@@ -34,7 +45,9 @@
         class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent"
       />
       <div *ngIf="form.controls.name.touched && form.controls.name.invalid">
-        <p *ngIf="form.controls.name.hasError('required')" class="text-red-500 text-xs mt-1">This field is required</p>
+        <p *ngIf="form.controls.name.hasError('required')" class="text-red-500 text-xs mt-1">
+          This field is required
+        </p>
       </div>
     </div>
     <div>
@@ -48,12 +61,18 @@
         class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent"
       />
       <div *ngIf="form.controls.email.touched && form.controls.email.invalid">
-        <p *ngIf="form.controls.email.hasError('required')" class="text-red-500 text-xs mt-1">This field is required</p>
-        <p *ngIf="form.controls.email.hasError('email')" class="text-red-500 text-xs mt-1">Please enter a valid email address</p>
+        <p *ngIf="form.controls.email.hasError('required')" class="text-red-500 text-xs mt-1">
+          This field is required
+        </p>
+        <p *ngIf="form.controls.email.hasError('email')" class="text-red-500 text-xs mt-1">
+          Please enter a valid email address
+        </p>
       </div>
     </div>
     <div>
-      <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+      <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1.5"
+        >Password</label
+      >
       <div class="relative">
         <input
           id="reg-password"
@@ -62,17 +81,29 @@
           [type]="showPassword ? 'text' : 'password'"
           class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent pr-10"
         />
-        <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors" (click)="showPassword = !showPassword">
-          <span class="material-symbols-outlined text-[18px]">{{ showPassword ? 'visibility' : 'visibility_off' }}</span>
+        <button
+          type="button"
+          class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+          (click)="showPassword = !showPassword"
+        >
+          <span class="material-symbols-outlined text-[18px]">{{
+            showPassword ? 'visibility' : 'visibility_off'
+          }}</span>
         </button>
       </div>
       <div *ngIf="form.controls.password.touched && form.controls.password.invalid">
-        <p *ngIf="form.controls.password.hasError('required')" class="text-red-500 text-xs mt-1">This field is required</p>
-        <p *ngIf="form.controls.password.hasError('minlength')" class="text-red-500 text-xs mt-1">Must be at least 8 characters</p>
+        <p *ngIf="form.controls.password.hasError('required')" class="text-red-500 text-xs mt-1">
+          This field is required
+        </p>
+        <p *ngIf="form.controls.password.hasError('minlength')" class="text-red-500 text-xs mt-1">
+          Must be at least 8 characters
+        </p>
       </div>
     </div>
     <div>
-      <label for="reg-confirm" class="block text-sm font-medium text-gray-700 mb-1.5">Confirm password</label>
+      <label for="reg-confirm" class="block text-sm font-medium text-gray-700 mb-1.5"
+        >Confirm password</label
+      >
       <input
         id="reg-confirm"
         formControlName="confirmPassword"
@@ -81,20 +112,33 @@
         class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent"
       />
       <div *ngIf="form.controls.confirmPassword.touched && form.controls.confirmPassword.invalid">
-        <p *ngIf="form.controls.confirmPassword.hasError('required')" class="text-red-500 text-xs mt-1">This field is required</p>
+        <p
+          *ngIf="form.controls.confirmPassword.hasError('required')"
+          class="text-red-500 text-xs mt-1"
+        >
+          This field is required
+        </p>
       </div>
     </div>
     <div *ngIf="form.controls.confirmPassword.touched">
-      <p *ngIf="form.hasError('mismatch')" class="text-red-500 text-xs mt-1">Passwords do not match</p>
+      <p *ngIf="form.hasError('mismatch')" class="text-red-500 text-xs mt-1">
+        Passwords do not match
+      </p>
     </div>
     @if (status === 'failed') {
       <div class="rounded-lg bg-danger-100 border border-danger-200 px-4 py-3">
         <p class="text-sm text-danger-800">{{ errorMessage }}</p>
       </div>
     }
-    <button type="submit" [disabled]="status === 'loading'" class="w-full rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2.5 transition-colors duration-150 disabled:opacity-50">
+    <button
+      type="submit"
+      [disabled]="status === 'loading'"
+      class="w-full rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2.5 transition-colors duration-150 disabled:opacity-50"
+    >
       @if (status === 'loading') {
-        <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span>
+        <span
+          class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"
+        ></span>
       }
       Create account
     </button>

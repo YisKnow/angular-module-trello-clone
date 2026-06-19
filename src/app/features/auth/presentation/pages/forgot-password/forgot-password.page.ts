@@ -8,12 +8,7 @@ import { BackgroundComponent } from '@features/auth/presentation/components/back
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [
-    RouterLink,
-    NgOptimizedImage,
-    ForgotPasswordFormComponent,
-    BackgroundComponent,
-  ],
+  imports: [RouterLink, NgOptimizedImage, ForgotPasswordFormComponent, BackgroundComponent],
   templateUrl: './forgot-password.page.html',
 })
 export class ForgotPasswordPage {}

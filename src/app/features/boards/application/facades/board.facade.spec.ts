@@ -5,53 +5,77 @@ import { BoardFacade } from '@features/boards/application/facades/board.facade';
 import { Board } from '@boards/domain/entities/board.entity';
 import { Card } from '@boards/domain/entities/card.entity';
 import { List } from '@boards/domain/entities/list.entity';
-import { BOARD_REPOSITORY } from '@boards/domain/repositories/board.repository';
-import { CARD_REPOSITORY } from '@boards/domain/repositories/card.repository';
-import { LIST_REPOSITORY } from '@boards/domain/repositories/list.repository';
-import { ME_REPOSITORY } from '@features/auth/domain/repositories/me.repository';
+import {
+  BOARD_REPOSITORY,
+  BOARDS_MY_BOARDS_REPOSITORY,
+  CARD_REPOSITORY,
+  LIST_REPOSITORY,
+} from '@boards/application/tokens/board-tokens';
 
 const makeCard = (id: string, position: number): Card => ({
-  id, title: `card-${id}`, position,
+  id,
+  title: `card-${id}`,
+  position,
   list: { id: 'l1', title: 'L', position: 1, cards: [] },
 });
 
 const makeList = (id: string, cards: Card[]): List => ({
-  id, title: `list-${id}`, position: 1, cards,
+  id,
+  title: `list-${id}`,
+  position: 1,
+  cards,
 });
 
 const makeBoard = (lists: List[]): Board => ({
-  id: 'b1', title: 'Test Board', backgroundColor: 'green',
-  members: [], lists, cards: [],
+  id: 'b1',
+  title: 'Test Board',
+  backgroundColor: 'green',
+  members: [],
+  lists,
+  cards: [],
 });
 
-const buildFacade = (overrides: {
-  getBoard?: ReturnType<typeof vi.fn>;
-  createBoard?: ReturnType<typeof vi.fn>;
-  moveCard?: ReturnType<typeof vi.fn>;
-  createCard?: ReturnType<typeof vi.fn>;
-  createList?: ReturnType<typeof vi.fn>;
-  boardRepository?: { getBoard?: ReturnType<typeof vi.fn> };
-} = {}) => {
+const buildFacade = (
+  overrides: {
+    getBoard?: ReturnType<typeof vi.fn>;
+    createBoard?: ReturnType<typeof vi.fn>;
+    moveCard?: ReturnType<typeof vi.fn>;
+    createCard?: ReturnType<typeof vi.fn>;
+    createList?: ReturnType<typeof vi.fn>;
+    boardRepository?: { getBoard?: ReturnType<typeof vi.fn> };
+  } = {},
+) => {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       BoardFacade,
-      { provide: BOARD_REPOSITORY, useValue: {
-        getBoard: overrides.getBoard ?? vi.fn().mockResolvedValue(makeBoard([])),
-        createBoard: overrides.createBoard ?? vi.fn(),
-        ...overrides.boardRepository,
-      }},
-      { provide: CARD_REPOSITORY, useValue: {
-        update: overrides.moveCard ?? vi.fn().mockResolvedValue(makeCard('c1', 100)),
-        create: overrides.createCard ?? vi.fn(),
-      }},
-      { provide: LIST_REPOSITORY, useValue: {
-        create: overrides.createList ?? vi.fn(),
-      }},
-      { provide: ME_REPOSITORY, useValue: {
-        getMeBoards: vi.fn().mockResolvedValue([]),
-        getMeProfile: vi.fn(),
-      }},
+      {
+        provide: BOARD_REPOSITORY,
+        useValue: {
+          getBoard: overrides.getBoard ?? vi.fn().mockResolvedValue(makeBoard([])),
+          createBoard: overrides.createBoard ?? vi.fn(),
+          ...overrides.boardRepository,
+        },
+      },
+      {
+        provide: CARD_REPOSITORY,
+        useValue: {
+          update: overrides.moveCard ?? vi.fn().mockResolvedValue(makeCard('c1', 100)),
+          create: overrides.createCard ?? vi.fn(),
+        },
+      },
+      {
+        provide: LIST_REPOSITORY,
+        useValue: {
+          create: overrides.createList ?? vi.fn(),
+        },
+      },
+      {
+        provide: BOARDS_MY_BOARDS_REPOSITORY,
+        useValue: {
+          getMyBoards: vi.fn().mockResolvedValue([]),
+        },
+      },
     ],
   });
   return TestBed.inject(BoardFacade);
@@ -75,7 +99,9 @@ describe('BoardFacade', () => {
 
   it('loadBoard sets status=loading then success', async () => {
     let resolve: (b: Board) => void;
-    const promise = new Promise<Board>((r) => { resolve = r; });
+    const promise = new Promise<Board>((r) => {
+      resolve = r;
+    });
     const f = buildFacade({ getBoard: vi.fn().mockReturnValue(promise) });
     void f.loadBoard('b1');
     expect(f.status()).toBe('loading');

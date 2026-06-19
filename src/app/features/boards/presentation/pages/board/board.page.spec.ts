@@ -19,7 +19,19 @@ const paramMap$ = new BehaviorSubject<ParamMap>(convertToParamMap({ boardId: 'b1
 const facadeState: {
   board: Board | null;
   status: 'init' | 'loading' | 'success' | 'failed';
-  backgroundColor: 'sky' | 'primary' | 'success' | 'danger' | 'warning' | 'info' | 'green' | 'amber' | 'rose' | 'violet' | 'teal' | 'lime';
+  backgroundColor:
+    | 'sky'
+    | 'primary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'green'
+    | 'amber'
+    | 'rose'
+    | 'violet'
+    | 'teal'
+    | 'lime';
   loadBoard: ReturnType<typeof vi.fn>;
   moveCard: ReturnType<typeof vi.fn>;
   createCard: ReturnType<typeof vi.fn>;
@@ -58,27 +70,39 @@ const facadeState: {
         @if (board(); as currentBoard) {
           <div class="flex grow items-start w-full h-full overflow-x-auto pb-4 gap-4">
             @for (list of currentBoard.lists; track list.id) {
-              <div class="flex flex-col w-72 shrink-0 bg-gray-100/80 rounded-xl border border-[#EAEAEA] max-h-full">
+              <div
+                class="flex flex-col w-72 shrink-0 bg-gray-100/80 rounded-xl border border-[#EAEAEA] max-h-full"
+              >
                 <div class="flex items-center justify-between px-4 pt-3 pb-2">
                   <h3 class="text-sm font-semibold text-gray-900">{{ list.title }}</h3>
-                  <span class="text-xs text-gray-400 bg-white rounded-full px-2 py-0.5">{{ list.cards.length }}</span>
+                  <span class="text-xs text-gray-400 bg-white rounded-full px-2 py-0.5">{{
+                    list.cards.length
+                  }}</span>
                 </div>
                 <div class="flex-1 overflow-y-auto px-3 pb-2 min-h-[3rem]">
                   @for (card of list.cards; track card.id) {
-                    <div class="bg-white rounded-lg border border-[#EAEAEA] p-3 mt-2 cursor-pointer first:mt-0">
+                    <div
+                      class="bg-white rounded-lg border border-[#EAEAEA] p-3 mt-2 cursor-pointer first:mt-0"
+                    >
                       <p class="text-sm font-medium text-gray-800">{{ card.title }}</p>
                     </div>
                   }
                 </div>
                 <div class="px-3 pb-3">
                   @if (!isCardFormOpen(list)) {
-                    <button type="button" (click)="openFormCard(list)" data-testid="add-card">+ Add a card</button>
+                    <button type="button" (click)="openFormCard(list)" data-testid="add-card">
+                      + Add a card
+                    </button>
                   }
                   @if (isCardFormOpen(list)) {
                     <div class="w-full">
                       <textarea data-testid="card-textarea"></textarea>
-                      <button type="button" (click)="createCard(list)" data-testid="create-card">Create</button>
-                      <button type="button" (click)="closeCardForm()" data-testid="close-card-form">Close</button>
+                      <button type="button" (click)="createCard(list)" data-testid="create-card">
+                        Create
+                      </button>
+                      <button type="button" (click)="closeCardForm()" data-testid="close-card-form">
+                        Close
+                      </button>
                     </div>
                   }
                 </div>
@@ -86,23 +110,26 @@ const facadeState: {
             }
             <div class="shrink-0 w-72">
               @if (!showListForm) {
-                <button
-                  type="button"
-                  (click)="showListForm = !showListForm"
-                  data-testid="add-list"
-                >+ Add another list</button>
+                <button type="button" (click)="showListForm = !showListForm" data-testid="add-list">
+                  + Add another list
+                </button>
               }
               @if (showListForm) {
                 <div>
                   <textarea data-testid="list-textarea"></textarea>
-                  <button type="button" (click)="addList()" data-testid="create-list">Create</button>
+                  <button type="button" (click)="addList()" data-testid="create-list">
+                    Create
+                  </button>
                   <button type="button" (click)="showListForm = !showListForm">Close</button>
                 </div>
               }
             </div>
           </div>
         } @else {
-          <div data-testid="board-skeleton" class="flex grow items-start w-full h-full overflow-x-auto gap-4 pb-4">
+          <div
+            data-testid="board-skeleton"
+            class="flex grow items-start w-full h-full overflow-x-auto gap-4 pb-4"
+          >
             <div class="rounded-xl bg-gray-100/80 w-72 p-3 shrink-0"></div>
             <div class="rounded-xl bg-gray-100/80 w-72 p-3 shrink-0"></div>
             <div class="rounded-xl bg-gray-100/80 w-72 p-3 shrink-0"></div>
@@ -155,17 +182,26 @@ class BoardPageHostComponent {
 }
 
 const makeCard = (id: string, title: string, position: number, listId: string): Card => ({
-  id, title, position,
+  id,
+  title,
+  position,
   list: { id: listId, title: 'L', position: 1, cards: [] },
 });
 
 const makeList = (id: string, title: string, cards: Card[]): List => ({
-  id, title, position: 1, cards,
+  id,
+  title,
+  position: 1,
+  cards,
 });
 
 const makeBoard = (lists: List[]): Board => ({
-  id: 'b1', title: 'My Roadmap', backgroundColor: 'sky',
-  members: [], lists, cards: [],
+  id: 'b1',
+  title: 'My Roadmap',
+  backgroundColor: 'sky',
+  members: [],
+  lists,
+  cards: [],
 });
 
 describe('BoardPage (component behavior via host)', () => {

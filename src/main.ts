@@ -6,23 +6,18 @@ import { AppComponent } from './app/app.component';
 import { appRoutes } from './app/app.routes';
 import { tokenInterceptor } from './app/core/interceptors/token.interceptor';
 import { provideAuth } from './app/features/auth/auth.providers';
-import { BOARD_REPOSITORY } from './app/features/boards/domain/repositories/board.repository';
-import { BoardHttpRepository } from './app/features/boards/infrastructure/repositories/board-http.repository';
-import { CARD_REPOSITORY } from './app/features/boards/domain/repositories/card.repository';
-import { CardHttpRepository } from './app/features/boards/infrastructure/repositories/card-http.repository';
-import { LIST_REPOSITORY } from './app/features/boards/domain/repositories/list.repository';
-import { ListHttpRepository } from './app/features/boards/infrastructure/repositories/list-http.repository';
-import { ME_REPOSITORY } from './app/features/auth/domain/repositories/me.repository';
-import { MeHttpRepository } from './app/features/auth/infrastructure/repositories/me-http.repository';
+import { provideBoards } from './app/features/boards/boards.providers';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(appRoutes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([tokenInterceptor])),
+    // Auth and Boards feature providers stay global because the
+    // layout shell (core/) injects AuthFacade and BoardFacade
+    // before the feature routes activate. AuthFacade is needed by
+    // the token interceptor; BoardFacade is needed by the navbar
+    // and the board-form in core/layout.
     provideAuth(),
-    { provide: BOARD_REPOSITORY, useExisting: BoardHttpRepository },
-    { provide: CARD_REPOSITORY, useExisting: CardHttpRepository },
-    { provide: LIST_REPOSITORY, useExisting: ListHttpRepository },
-    { provide: ME_REPOSITORY, useExisting: MeHttpRepository },
+    provideBoards(),
   ],
 }).catch((err) => console.error(err));

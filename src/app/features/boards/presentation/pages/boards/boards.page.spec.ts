@@ -18,9 +18,7 @@ class CardColorStubComponent {
   title = () => '';
 }
 
-const BOARDS_TEST_DATA = new InjectionToken<{ load: () => BoardSummary[] }>(
-  'BOARDS_TEST_DATA',
-);
+const BOARDS_TEST_DATA = new InjectionToken<{ load: () => BoardSummary[] }>('BOARDS_TEST_DATA');
 
 function makeHost(loader: () => BoardSummary[]) {
   @Component({
@@ -37,7 +35,10 @@ function makeHost(loader: () => BoardSummary[]) {
         <div class="w-full">
           <h1>Recently viewed</h1>
           @if (boards.isLoading()) {
-            <div data-testid="boards-skeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div
+              data-testid="boards-skeleton"
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            >
               <app-skeleton variant="card" height="6rem"></app-skeleton>
               <app-skeleton variant="card" height="6rem"></app-skeleton>
               <app-skeleton variant="card" height="6rem"></app-skeleton>
@@ -46,13 +47,21 @@ function makeHost(loader: () => BoardSummary[]) {
           } @else {
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               @for (board of boards.value(); track board.id) {
-                <app-card-color [color]="board.backgroundColor" [title]="'test'">{{ board.title }}</app-card-color>
+                <app-card-color [color]="board.backgroundColor" [title]="'test'">{{
+                  board.title
+                }}</app-card-color>
               } @empty {
-                <div data-testid="empty-state" class="col-span-full flex flex-col items-center justify-center p-12 rounded-xl border-2 border-dashed border-gray-300">
+                <div
+                  data-testid="empty-state"
+                  class="col-span-full flex flex-col items-center justify-center p-12 rounded-xl border-2 border-dashed border-gray-300"
+                >
                   <span class="material-symbols-outlined text-5xl text-gray-400">view_kanban</span>
                   <h2 class="mt-4 text-lg font-bold text-gray-700">No boards yet</h2>
                   <p class="mt-1 text-sm text-gray-500">Create your first board to get started.</p>
-                  <button type="button" class="mt-6 rounded-lg bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 font-medium focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors">
+                  <button
+                    type="button"
+                    class="mt-6 rounded-lg bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 font-medium focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors"
+                  >
                     Create your first board
                   </button>
                 </div>
@@ -76,7 +85,9 @@ function makeHost(loader: () => BoardSummary[]) {
 describe('BoardsPage (Visual Redesign — T12 skeleton & empty state)', () => {
   it('shows the skeleton grid while data is loading', async () => {
     let resolve!: (boards: BoardSummary[]) => void;
-    const pending = new Promise<BoardSummary[]>((r) => { resolve = r; });
+    const pending = new Promise<BoardSummary[]>((r) => {
+      resolve = r;
+    });
     const Host = makeHost(() => pending as unknown as BoardSummary[]);
     await render(Host);
     expect(screen.getByTestId('boards-skeleton')).toBeInTheDocument();

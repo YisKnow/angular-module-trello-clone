@@ -36,7 +36,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
         </div>
       </div>
       <div>
-        <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1"
+          >Password</label
+        >
         <div class="relative">
           <input
             id="reg-password"
@@ -48,7 +50,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
         </div>
       </div>
       <div>
-        <label for="reg-confirm" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+        <label for="reg-confirm" class="block text-sm font-medium text-gray-700 mb-1"
+          >Confirm password</label
+        >
         <div class="relative">
           <input
             id="reg-confirm"
@@ -67,14 +71,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 })
 class RegisterFormHostComponent {
   private readonly fb = new FormBuilder().nonNullable;
-  form = this.fb.group(
-    {
-      name: ['', [Validators.required]],
-      email: ['', [Validators.email, Validators.required]],
-      password: ['', [Validators.minLength(8), Validators.required]],
-      confirmPassword: ['', [Validators.required]],
-    },
-  );
+  form = this.fb.group({
+    name: ['', [Validators.required]],
+    email: ['', [Validators.email, Validators.required]],
+    password: ['', [Validators.minLength(8), Validators.required]],
+    confirmPassword: ['', [Validators.required]],
+  });
 }
 
 describe('RegisterForm (Visual Redesign — labels & focus rings)', () => {

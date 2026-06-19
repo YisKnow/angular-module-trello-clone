@@ -5,18 +5,14 @@ import { firstValueFrom } from 'rxjs';
 
 import { environment } from '@environments/environment';
 
-import { Colors } from '@shared/models/colors.model';
 import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { Board } from '../../domain/entities/board.entity';
-import { BoardRepository } from '../../domain/repositories/board.repository';
-import { BoardMapper } from '../../application/mappers/board.mapper';
-import {
-  BoardDto,
-  CreateBoardDto,
-} from '../../application/dtos/board.dto';
+import { BoardRepository } from '../../application/contracts/board-contracts';
+import { BoardMapper } from '../mappers/board.mapper';
+import { BoardDto, CreateBoardDto } from '../dtos/board.dto';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class BoardHttpRepository implements BoardRepository {
   private readonly apiUrl = environment.API_URL;
 
@@ -31,7 +27,7 @@ export class BoardHttpRepository implements BoardRepository {
     return BoardMapper.toDomain(dto);
   }
 
-  async createBoard(title: string, backgroundColor: Colors): Promise<Board> {
+  async createBoard(title: string, backgroundColor: Board['backgroundColor']): Promise<Board> {
     const body: CreateBoardDto = { title, backgroundColor };
     const dto = await firstValueFrom(
       this.http.post<BoardDto>(`${this.apiUrl}/api/v1/boards`, body, {

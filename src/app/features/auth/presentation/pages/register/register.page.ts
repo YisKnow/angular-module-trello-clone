@@ -8,12 +8,7 @@ import { BackgroundComponent } from '@features/auth/presentation/components/back
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [
-    RouterLink,
-    NgOptimizedImage,
-    RegisterFormComponent,
-    BackgroundComponent,
-  ],
+  imports: [RouterLink, NgOptimizedImage, RegisterFormComponent, BackgroundComponent],
   templateUrl: './register.page.html',
 })
 export class RegisterPage {}

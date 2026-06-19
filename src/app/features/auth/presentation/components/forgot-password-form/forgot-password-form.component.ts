@@ -1,12 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import {
-  form,
-  schema,
-  required,
-  email,
-  FormField,
-  FormRoot,
-} from '@angular/forms/signals';
+import { form, schema, required, email, FormField, FormRoot } from '@angular/forms/signals';
 import { Subject } from 'rxjs';
 
 import { toAsyncSignal, errorMessageOf } from '@shared/utils/async-signal';
@@ -48,7 +41,9 @@ export class ForgotPasswordFormComponent {
   private readonly _recoveryAsync = toAsyncSignal<{ email: string }, void>({
     subject: this.recoverySubject,
     action: ({ email }) => this.authFacade.recovery(email),
-    onStart: () => { this.status = 'loading'; },
+    onStart: () => {
+      this.status = 'loading';
+    },
     onSuccess: () => {
       this.status = 'success';
       this.emailSent = true;

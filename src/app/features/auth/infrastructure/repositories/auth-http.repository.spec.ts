@@ -1,28 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClient,
-  provideHttpClient,
-  withInterceptors,
-} from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { tokenInterceptor, checkToken } from '@core/interceptors/token.interceptor';
 import { TokenService } from '@core/auth/token.service';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 import { AuthHttpRepository } from '@features/auth/infrastructure/repositories/auth-http.repository';
-import { AUTH_REPOSITORY } from '@features/auth/domain/repositories/auth.repository';
+import { AUTH_REPOSITORY } from '@features/auth/application/tokens/auth-tokens';
 import { provideAuth } from '@features/auth/auth.providers';
 
 const makeJwt = (payload: Record<string, unknown>): string => {
   const toB64Url = (input: string) =>
-    btoa(input)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+    btoa(input).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const header = toB64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const body = toB64Url(JSON.stringify(payload));
   return `${header}.${body}.sig`;
@@ -126,7 +116,11 @@ describe('AuthHttpRepository + AuthFacade', () => {
     const registerReq = httpMock.expectOne(
       (r) => r.url.endsWith('/api/v1/auth/register') && r.method === 'POST',
     );
-    expect(registerReq.request.body).toEqual({ name: 'Alice', email: 'a@b.com', password: 'secret' });
+    expect(registerReq.request.body).toEqual({
+      name: 'Alice',
+      email: 'a@b.com',
+      password: 'secret',
+    });
     registerReq.flush({});
 
     // Let the await chain advance to the login call.
@@ -195,10 +189,8 @@ describe('AuthHttpRepository + AuthFacade', () => {
     // The token interceptor requires a valid access token when the
     // request uses the `checkToken()` context. Seed the cookie first.
     const future = Math.floor(Date.now() / 1000) + 3600;
-    const headerB64 = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
-      .replace(/=/g, '');
-    const payloadB64 = btoa(JSON.stringify({ sub: '1', exp: future }))
-      .replace(/=/g, '');
+    const headerB64 = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
+    const payloadB64 = btoa(JSON.stringify({ sub: '1', exp: future })).replace(/=/g, '');
     const validJwt = `${headerB64}.${payloadB64}.sig`;
     tokenService.saveToken(validJwt);
     tokenService.saveRefreshToken(validJwt);
@@ -207,12 +199,14 @@ describe('AuthHttpRepository + AuthFacade', () => {
     const req = httpMock.expectOne(
       (r) => r.url.endsWith('/api/v1/auth/profile') && r.method === 'GET',
     );
-    expect(req.request.headers.get('Authorization')).toBe(
-      `Bearer ${validJwt}`,
-    );
+    expect(req.request.headers.get('Authorization')).toBe(`Bearer ${validJwt}`);
     req.flush({
-      id: 1, name: 'Alice', email: 'a@b.com', avatar: '',
-      creationAt: '2024-01-01', updatedAt: '2024-01-02',
+      id: 1,
+      name: 'Alice',
+      email: 'a@b.com',
+      avatar: '',
+      creationAt: '2024-01-01',
+      updatedAt: '2024-01-02',
     });
 
     const user = await promise;

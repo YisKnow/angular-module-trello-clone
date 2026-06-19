@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { CardHttpRepository } from '@features/boards/infrastructure/repositories/card-http.repository';
 import { ListHttpRepository } from '@features/boards/infrastructure/repositories/list-http.repository';
@@ -35,9 +32,7 @@ describe('CardHttpRepository', () => {
       boardId: 'b1',
     };
     const promise = repo.create(dto);
-    const req = httpMock.expectOne(
-      (r) => r.method === 'POST' && r.url.includes('/api/v1/cards'),
-    );
+    const req = httpMock.expectOne((r) => r.method === 'POST' && r.url.includes('/api/v1/cards'));
     expect(req.request.body).toEqual(dto);
     req.flush({
       id: 'c1',
@@ -51,9 +46,7 @@ describe('CardHttpRepository', () => {
 
   it('update makes PUT request with the change payload', async () => {
     const promise = repo.update('c1', { title: 'Updated' });
-    const req = httpMock.expectOne(
-      (r) => r.method === 'PUT' && r.url.includes('/api/v1/cards/c1'),
-    );
+    const req = httpMock.expectOne((r) => r.method === 'PUT' && r.url.includes('/api/v1/cards/c1'));
     expect(req.request.body).toEqual({ title: 'Updated' });
     req.flush({
       id: 'c1',
@@ -87,9 +80,7 @@ describe('ListHttpRepository', () => {
   it('create makes POST request with the right body', async () => {
     const dto = { title: 'New List', position: 65535, boardId: 'b1' };
     const promise = repo.create(dto);
-    const req = httpMock.expectOne(
-      (r) => r.method === 'POST' && r.url.includes('/api/v1/lists'),
-    );
+    const req = httpMock.expectOne((r) => r.method === 'POST' && r.url.includes('/api/v1/lists'));
     expect(req.request.body).toEqual(dto);
     req.flush({ id: 'l1', title: 'New List', position: 65535, cards: [] });
     const list = await promise;

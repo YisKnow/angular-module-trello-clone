@@ -38,21 +38,13 @@ describe('position.rule', () => {
   });
 
   it('getCardPosition: middle card returns average of neighbours', () => {
-    const cards = [
-      makeCard('c1', 100),
-      makeCard('c2', 200),
-      makeCard('c3', 300),
-    ];
+    const cards = [makeCard('c1', 100), makeCard('c2', 200), makeCard('c3', 300)];
     // (100 + 300) / 2 = 200
     expect(getCardPosition(cards, 1)).toBe(200);
   });
 
   it('getCardPosition: last card returns prev + bufferSpace', () => {
-    const cards = [
-      makeCard('c1', 100),
-      makeCard('c2', 200),
-      makeCard('c3', 300),
-    ];
+    const cards = [makeCard('c1', 100), makeCard('c2', 200), makeCard('c3', 300)];
     expect(getCardPosition(cards, 2)).toBe(200 + BUFFER_SPACE);
   });
 

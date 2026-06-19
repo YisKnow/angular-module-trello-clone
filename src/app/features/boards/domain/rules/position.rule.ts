@@ -15,10 +15,7 @@ import { List } from '../entities/list.entity';
 // unit-tested without Angular DI and reused by use cases.
 export const BUFFER_SPACE = 65535;
 
-export function getCardPosition(
-  cards: Card[],
-  currentIndex: number,
-): number {
+export function getCardPosition(cards: Card[], currentIndex: number): number {
   if (cards.length === 1) {
     return BUFFER_SPACE;
   }
@@ -45,9 +42,7 @@ export function getCardPosition(
 
 // Position for a new card or list appended at the end of a list.
 // Empty list → bufferSpace; otherwise last position + bufferSpace.
-export function getPositionForNewItem(
-  elements: Card[] | List[],
-): number {
+export function getPositionForNewItem(elements: Card[] | List[]): number {
   if (elements.length === 0) {
     return BUFFER_SPACE;
   }

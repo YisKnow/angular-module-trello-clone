@@ -12,11 +12,11 @@ import {
   CardRepository,
   CreateCardInput,
   UpdateCardInput,
-} from '../../domain/repositories/card.repository';
-import { CardMapper } from '../../application/mappers/board.mapper';
-import { CardDto } from '../../application/dtos/board.dto';
+} from '../../application/contracts/board-contracts';
+import { CardMapper } from '../mappers/board.mapper';
+import { CardDto } from '../dtos/board.dto';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class CardHttpRepository implements CardRepository {
   private readonly apiUrl = environment.API_URL;
 

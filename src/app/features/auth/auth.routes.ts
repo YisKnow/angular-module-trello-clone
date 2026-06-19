@@ -8,8 +8,7 @@ export const AUTH_ROUTES: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () =>
-      import('./presentation/pages/login/login.page').then((m) => m.LoginPage),
+    loadComponent: () => import('./presentation/pages/login/login.page').then((m) => m.LoginPage),
     title: 'Login',
   },
   {
@@ -23,17 +22,13 @@ export const AUTH_ROUTES: Routes = [
   {
     path: 'register',
     loadComponent: () =>
-      import('./presentation/pages/register/register.page').then(
-        (m) => m.RegisterPage,
-      ),
+      import('./presentation/pages/register/register.page').then((m) => m.RegisterPage),
     title: 'Register',
   },
   {
     path: 'recovery',
     loadComponent: () =>
-      import('./presentation/pages/recovery/recovery.page').then(
-        (m) => m.RecoveryPage,
-      ),
+      import('./presentation/pages/recovery/recovery.page').then((m) => m.RecoveryPage),
     title: 'Recovery',
   },
 ];

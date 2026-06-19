@@ -57,7 +57,9 @@ export class LoginFormComponent {
   private readonly _loginAsync = toAsyncSignal<{ email: string; password: string }, unknown>({
     subject: this.loginSubject,
     action: ({ email, password }) => this.authFacade.login(email, password),
-    onStart: () => { this.status = 'loading'; },
+    onStart: () => {
+      this.status = 'loading';
+    },
     onSuccess: () => {
       this.status = 'success';
       this.router.navigate(['/app']);

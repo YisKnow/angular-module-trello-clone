@@ -1,7 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/angular';
 import { Component, signal } from '@angular/core';
-import { FormField, FormRoot, form, schema, required, email, minLength } from '@angular/forms/signals';
+import {
+  FormField,
+  FormRoot,
+  form,
+  schema,
+  required,
+  email,
+  minLength,
+} from '@angular/forms/signals';
 
 // ponytail: lightweight host that mirrors the real LoginFormComponent's
 // template + signal-form structure, so we can test the rendered DOM
@@ -26,7 +34,9 @@ import { FormField, FormRoot, form, schema, required, email, minLength } from '@
       </div>
       <div>
         <div class="relative">
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1"
+            >Password</label
+          >
           <input
             id="password"
             [formField]="form.password"

@@ -1,6 +1,12 @@
+// Wire DTOs for the boards feature.
+//
+// These describe the JSON contract the backend actually returns.
+// Mappers (in infrastructure/mappers) translate DTOs into domain
+// entities. The application layer never sees these types.
+
 import { Colors } from '@shared/models/colors.model';
 
-import { UserDto } from '@features/auth/application/dtos/auth.dto';
+import { UserDto } from '@features/auth/infrastructure/dtos/auth.dto';
 
 export interface BoardDto {
   id: string;

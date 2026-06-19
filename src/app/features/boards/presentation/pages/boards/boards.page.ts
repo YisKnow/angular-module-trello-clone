@@ -14,11 +14,7 @@ import { BoardFacade } from '@boards/application/facades/board.facade';
 @Component({
   selector: 'app-boards',
   standalone: true,
-  imports: [
-    RouterLink,
-    NgClass,
-    SkeletonComponent,
-  ],
+  imports: [RouterLink, NgClass, SkeletonComponent],
   templateUrl: './boards.page.html',
 })
 export class BoardsPage {

@@ -1,17 +1,7 @@
-import {
-  Component,
-  OnDestroy,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {
-  FormControl,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import {
   CdkDragDrop,
@@ -36,13 +26,7 @@ import { TodoDialogComponent } from '@boards/presentation/components/todo-dialog
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [
-    NgClass,
-    ReactiveFormsModule,
-    DragDropModule,
-    DialogModule,
-    SkeletonComponent,
-  ],
+  imports: [NgClass, ReactiveFormsModule, DragDropModule, DialogModule, SkeletonComponent],
   templateUrl: './board.page.html',
   styles: [
     `
@@ -97,11 +81,7 @@ export class BoardPage implements OnDestroy {
 
   drop(event: CdkDragDrop<Card[]>) {
     if (event.previousContainer === event.container) {
-      moveItemInArray(
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       transferArrayItem(
         event.previousContainer.data,

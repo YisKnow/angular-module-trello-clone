@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { AuthMapper } from '@features/auth/application/mappers/auth.mapper';
+import { AuthMapper } from '@features/auth/infrastructure/mappers/auth.mapper';
 
 describe('AuthMapper', () => {
   it('toTokens maps snake_case wire format to camelCase tokens', () => {

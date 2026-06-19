@@ -2,14 +2,25 @@ import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@a
 
 import { Colors } from '@shared/models/colors.model';
 
-import { Board, BoardSummary } from '../../domain/entities/board.entity';
+import { Board } from '../../domain/entities/board.entity';
 import { Card } from '../../domain/entities/card.entity';
 import { List } from '../../domain/entities/list.entity';
-import { getCardPosition, getPositionForNewItem } from '../../domain/rules/position.rule';
-import { BOARD_REPOSITORY } from '../../domain/repositories/board.repository';
-import { CARD_REPOSITORY } from '../../domain/repositories/card.repository';
-import { LIST_REPOSITORY } from '../../domain/repositories/list.repository';
-import { ME_REPOSITORY } from '@features/auth/domain/repositories/me.repository';
+import {
+  BOARD_REPOSITORY,
+  BOARDS_MY_BOARDS_REPOSITORY,
+  CARD_REPOSITORY,
+  LIST_REPOSITORY,
+} from '../tokens/board-tokens';
+import {
+  CreateCardUseCase,
+  CreateBoardUseCase,
+  CreateListUseCase,
+  DeleteBoardUseCase,
+  LoadBoardUseCase,
+  LoadMyBoardsUseCase,
+  MoveCardUseCase,
+  UpdateCardDescriptionUseCase,
+} from '../use-cases/board.use-cases';
 
 type RequestStatus = 'init' | 'loading' | 'success' | 'failed';
 const DEFAULT_BG: Colors = 'sky';
@@ -31,16 +42,29 @@ export class BoardFacade {
     () => this._board()?.backgroundColor ?? DEFAULT_BG,
   );
 
-  // ponytail: inlined use case wrappers — call repositories directly.
-  private readonly boardRepository = inject(BOARD_REPOSITORY);
-  private readonly cardRepository = inject(CARD_REPOSITORY);
-  private readonly listRepository = inject(LIST_REPOSITORY);
-  private readonly meRepository = inject(ME_REPOSITORY);
+  // Use cases wired through repository contracts. The facade stays the
+  // public API for presentation; presentation should not see use cases
+  // or repositories directly.
+  private readonly loadBoardUseCase = new LoadBoardUseCase(inject(BOARD_REPOSITORY));
+  private readonly createBoardUseCase = new CreateBoardUseCase(inject(BOARD_REPOSITORY));
+  private readonly deleteBoardUseCase = new DeleteBoardUseCase(inject(BOARD_REPOSITORY));
+  private readonly loadMyBoardsUseCase = new LoadMyBoardsUseCase(
+    inject(BOARDS_MY_BOARDS_REPOSITORY),
+  );
+  private readonly moveCardUseCase = new MoveCardUseCase(
+    inject(CARD_REPOSITORY),
+    inject(BOARD_REPOSITORY),
+  );
+  private readonly updateCardDescriptionUseCase = new UpdateCardDescriptionUseCase(
+    inject(CARD_REPOSITORY),
+  );
+  private readonly createCardUseCase = new CreateCardUseCase(inject(CARD_REPOSITORY));
+  private readonly createListUseCase = new CreateListUseCase(inject(LIST_REPOSITORY));
 
   async loadBoard(id: Board['id']): Promise<void> {
     this._status.set('loading');
     try {
-      const board = await this.boardRepository.getBoard(id);
+      const board = await this.loadBoardUseCase.execute(id);
       this._board.set(board);
       this._status.set('success');
     } catch {
@@ -49,18 +73,18 @@ export class BoardFacade {
     }
   }
 
-  getMyBoards(): Promise<BoardSummary[]> {
-    return this.meRepository.getMeBoards();
+  getMyBoards() {
+    return this.loadMyBoardsUseCase.execute();
   }
 
   async createBoard(title: string, backgroundColor: Colors): Promise<Board> {
-    const board = await this.boardRepository.createBoard(title, backgroundColor);
+    const board = await this.createBoardUseCase.execute(title, backgroundColor);
     this._boardsVersion.update((v) => v + 1);
     return board;
   }
 
   async deleteBoard(id: Board['id']): Promise<void> {
-    await this.boardRepository.deleteBoard(id);
+    await this.deleteBoardUseCase.execute(id);
     this._boardsVersion.update((v) => v + 1);
   }
 
@@ -68,37 +92,14 @@ export class BoardFacade {
     const current = this._board();
     if (!current) return;
 
-    // CDK's moveItemInArray/transferArrayItem already mutated the target
-    // list's cards array in place. We must NOT splice the card back in —
-    // doing so creates a duplicate. We only need to:
-    //   1. Remove the card from any other list (cross-list cleanup)
-    //   2. Recompute buffer-space positions on the already-moved array
-    const updated: Board = {
-      ...current,
-      lists: current.lists.map((list) => {
-        if (list.id === listId) {
-          const newCards = list.cards.map((c, i) => ({
-            ...c,
-            position: getCardPosition(list.cards, i),
-          }));
-          return { ...list, cards: newCards };
-        }
-        return { ...list, cards: list.cards.filter((c) => c.id !== card.id) };
-      }),
-    };
-
-    this._board.set(updated);
-
-    const targetList = updated.lists.find((l) => l.id === listId);
-    const bufferPosition = targetList
-      ? getCardPosition(targetList.cards, position)
-      : position;
-
     try {
-      await this.cardRepository.update(card.id, { position: bufferPosition, listId });
+      const { next } = await this.moveCardUseCase.execute(current, card, position, listId);
+      this._board.set(next);
     } catch (err) {
-      const refreshed = await this.boardRepository.getBoard(current.id);
-      this._board.set(refreshed);
+      const refreshed = (err as { __board?: Board }).__board;
+      if (refreshed) {
+        this._board.set(refreshed);
+      }
       throw err;
     }
   }
@@ -106,8 +107,7 @@ export class BoardFacade {
   async createCard(list: List, title: string): Promise<void> {
     const current = this._board();
     if (!current) return;
-    const position = getPositionForNewItem(list.cards);
-    const card = await this.cardRepository.create({ title, position, listId: list.id, boardId: current.id });
+    const { card } = await this.createCardUseCase.execute(list, title, current.id);
     const updated: Board = {
       ...current,
       lists: current.lists.map((l) => {
@@ -122,12 +122,14 @@ export class BoardFacade {
   async updateCardDescription(cardId: Card['id'], description: string): Promise<void> {
     const current = this._board();
     if (!current) return;
-    const updated = await this.cardRepository.update(cardId, { description });
+    const updated = await this.updateCardDescriptionUseCase.execute(cardId, description);
     this._board.set({
       ...current,
       lists: current.lists.map((l) => ({
         ...l,
-        cards: l.cards.map((c) => (c.id === updated.id ? { ...c, description: updated.description } : c)),
+        cards: l.cards.map((c) =>
+          c.id === updated.id ? { ...c, description: updated.description } : c,
+        ),
       })),
     });
   }
@@ -135,8 +137,7 @@ export class BoardFacade {
   async createList(title: string): Promise<void> {
     const current = this._board();
     if (!current) return;
-    const position = getPositionForNewItem(current.lists);
-    const list = await this.listRepository.create({ title, position, boardId: current.id });
+    const { list } = await this.createListUseCase.execute(title, current.id, current.lists);
     this._board.set({ ...current, lists: [...current.lists, { ...list, cards: [] }] });
   }
 
@@ -165,9 +166,17 @@ export class BoardFacade {
     });
   }
 
-  openCardForm(listId: string): void { this._openCardFormListId.set(listId); }
-  closeCardForm(): void { this._openCardFormListId.set(null); }
-  isCardFormOpen(listId: string): boolean { return this._openCardFormListId() === listId; }
+  openCardForm(listId: string): void {
+    this._openCardFormListId.set(listId);
+  }
+  closeCardForm(): void {
+    this._openCardFormListId.set(null);
+  }
+  isCardFormOpen(listId: string): boolean {
+    return this._openCardFormListId() === listId;
+  }
 
-  resetBackgroundColor(): void { this._board.set(null); }
+  resetBackgroundColor(): void {
+    this._board.set(null);
+  }
 }

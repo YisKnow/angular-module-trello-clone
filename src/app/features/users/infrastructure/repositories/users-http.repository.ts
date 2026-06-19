@@ -8,8 +8,8 @@ import { environment } from '@environments/environment';
 import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { User } from '@features/auth/domain/entities/user.entity';
-import { AuthMapper } from '@features/auth/application/mappers/auth.mapper';
-import { UserDto } from '@features/auth/application/dtos/auth.dto';
+import { AuthMapper } from '@features/auth/infrastructure/mappers/auth.mapper';
+import { UserDto } from '@features/auth/infrastructure/dtos/auth.dto';
 
 @Injectable({ providedIn: 'root' })
 export class UsersHttpRepository {

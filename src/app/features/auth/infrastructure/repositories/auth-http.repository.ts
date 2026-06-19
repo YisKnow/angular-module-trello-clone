@@ -9,21 +9,18 @@ import { TokenService } from '@core/auth/token.service';
 import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { User } from '../../domain/entities/user.entity';
+import { AuthRepository, AuthTokens } from '../../application/contracts/auth-contracts';
+import { AuthMapper } from '../mappers/auth.mapper';
 import {
-  AuthRepository,
-  AuthTokens,
-} from '../../domain/repositories/auth.repository';
-import { AuthMapper } from '../../application/mappers/auth.mapper';
-import {
-  ChangePasswordRequestDto,
   IsAvailableRequestDto,
   IsAvailableResponseDto,
   LoginRequestDto,
   LoginResponseDto,
   RecoveryRequestDto,
+  ChangePasswordRequestDto,
   RegisterRequestDto,
   UserDto,
-} from '../../application/dtos/auth.dto';
+} from '../dtos/auth.dto';
 
 @Injectable({ providedIn: 'root' })
 export class AuthHttpRepository implements AuthRepository {
@@ -48,21 +45,11 @@ export class AuthHttpRepository implements AuthRepository {
   }
 
   register(name: string, email: string, password: string): Promise<void> {
-    const body: RegisterRequestDto = AuthMapper.toRegisterRequest(
-      name,
-      email,
-      password,
-    );
-    return firstValueFrom(
-      this.http.post<void>(`${this.apiUrl}/api/v1/auth/register`, body),
-    );
+    const body: RegisterRequestDto = AuthMapper.toRegisterRequest(name, email, password);
+    return firstValueFrom(this.http.post<void>(`${this.apiUrl}/api/v1/auth/register`, body));
   }
 
-  async registerAndLogin(
-    name: string,
-    email: string,
-    password: string,
-  ): Promise<AuthTokens> {
+  async registerAndLogin(name: string, email: string, password: string): Promise<AuthTokens> {
     await this.register(name, email, password);
     return this.login(email, password);
   }
@@ -70,37 +57,26 @@ export class AuthHttpRepository implements AuthRepository {
   async isAvailable(email: string): Promise<boolean> {
     const body: IsAvailableRequestDto = { email };
     const response = await firstValueFrom(
-      this.http.post<IsAvailableResponseDto>(
-        `${this.apiUrl}/api/v1/auth/is-available`,
-        body,
-      ),
+      this.http.post<IsAvailableResponseDto>(`${this.apiUrl}/api/v1/auth/is-available`, body),
     );
     return response.isAvailable;
   }
 
   recovery(email: string): Promise<void> {
-    const body: RecoveryRequestDto = { email };
-    return firstValueFrom(
-      this.http.post<void>(`${this.apiUrl}/api/v1/auth/recovery`, body),
-    );
+    const body: RecoveryRequestDto = AuthMapper.toRecoveryRequest(email);
+    return firstValueFrom(this.http.post<void>(`${this.apiUrl}/api/v1/auth/recovery`, body));
   }
 
   changePassword(token: string, newPassword: string): Promise<void> {
-    const body: ChangePasswordRequestDto = { token, newPassword };
-    return firstValueFrom(
-      this.http.post<void>(
-        `${this.apiUrl}/api/v1/auth/change-password`,
-        body,
-      ),
-    );
+    const body: ChangePasswordRequestDto = AuthMapper.toChangePasswordRequest(token, newPassword);
+    return firstValueFrom(this.http.post<void>(`${this.apiUrl}/api/v1/auth/change-password`, body));
   }
 
   async getProfile(): Promise<User> {
     const dto = await firstValueFrom(
-      this.http
-        .get<UserDto>(`${this.apiUrl}/api/v1/auth/profile`, {
-          context: checkToken(),
-        }),
+      this.http.get<UserDto>(`${this.apiUrl}/api/v1/auth/profile`, {
+        context: checkToken(),
+      }),
     );
     return AuthMapper.toUser(dto);
   }
@@ -124,9 +100,7 @@ export class AuthHttpRepository implements AuthRepository {
     }
     const refreshToken = this.tokenService.getRefreshToken();
     if (!refreshToken || !this.tokenService.isValidRefreshToken()) {
-      return Promise.reject(
-        new Error('No valid refresh token available'),
-      );
+      return Promise.reject(new Error('No valid refresh token available'));
     }
     const body = AuthMapper.toRefreshRequest(refreshToken);
     this.refreshPromise = firstValueFrom(

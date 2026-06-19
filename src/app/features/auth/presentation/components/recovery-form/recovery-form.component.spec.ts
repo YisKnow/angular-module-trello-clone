@@ -53,7 +53,8 @@ class RecoveryFormHostComponent {
 
   recovery() {
     if (this.form.valid) {
-      facadeMock.changePassword(this.token, this.form.getRawValue().newPassword)
+      facadeMock
+        .changePassword(this.token, this.form.getRawValue().newPassword)
         .then(() => {
           this.status = 'success';
           this.errorMessage = '';

@@ -1,6 +1,9 @@
-// Backend DTOs — wire format. Domain entities are the trusted internal
-// model. Mappers convert DTO ↔ entity so the rest of the app never
-// sees backend field names directly.
+// Wire DTOs for the auth feature.
+//
+// These describe the JSON contract the backend actually returns.
+// Mappers (in infrastructure/mappers) translate DTOs into domain
+// entities. The application layer never sees these types.
+
 export interface LoginRequestDto {
   email: string;
   password: string;

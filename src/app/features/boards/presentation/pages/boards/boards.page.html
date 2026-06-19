@@ -2,22 +2,34 @@
   <!-- Page header -->
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Your boards</h1>
-    <p class="text-sm text-gray-500 mt-1">{{ boards.value().length }} {{ boards.value().length === 1 ? 'board' : 'boards' }}</p>
+    <p class="text-sm text-gray-500 mt-1">
+      {{ boards.value().length }} {{ boards.value().length === 1 ? 'board' : 'boards' }}
+    </p>
   </div>
 
   @if (boards.error()) {
-    <div data-testid="boards-error" class="mb-4 rounded-lg bg-danger-100 border border-danger-200 px-4 py-3 flex items-center justify-between gap-3">
-      <p class="text-sm text-danger-800">Could not load your boards. Check your connection and try again.</p>
+    <div
+      data-testid="boards-error"
+      class="mb-4 rounded-lg bg-danger-100 border border-danger-200 px-4 py-3 flex items-center justify-between gap-3"
+    >
+      <p class="text-sm text-danger-800">
+        Could not load your boards. Check your connection and try again.
+      </p>
       <button
         type="button"
         (click)="boards.reload()"
         class="rounded-lg bg-danger-600 hover:bg-danger-700 text-white text-sm font-medium px-3 py-1.5 transition-colors duration-150"
-      >Retry</button>
+      >
+        Retry
+      </button>
     </div>
   }
 
   @if (boards.isLoading()) {
-    <div data-testid="boards-skeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div
+      data-testid="boards-skeleton"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+    >
       @for (placeholder of [0, 1, 2, 3]; track placeholder) {
         <div class="rounded-xl overflow-hidden border border-[#EAEAEA] bg-white">
           <app-skeleton variant="card" height="5.5rem"></app-skeleton>
@@ -35,7 +47,10 @@
         >
           <a [routerLink]="['/app/boards', board.id]" class="block">
             <!-- Color band as the board's "cover" -->
-            <div class="h-20 w-full transition-all duration-200 group-hover:h-24" [ngClass]="coverClass(board.backgroundColor)"></div>
+            <div
+              class="h-20 w-full transition-all duration-200 group-hover:h-24"
+              [ngClass]="coverClass(board.backgroundColor)"
+            ></div>
             <!-- Title area -->
             <div class="p-4">
               <h3 class="text-sm font-semibold text-gray-900 truncate">{{ board.title }}</h3>
@@ -54,7 +69,9 @@
         </div>
       } @empty {
         <div data-testid="empty-state" class="col-span-full">
-          <div class="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">
+          <div
+            class="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white"
+          >
             <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
               <span class="material-symbols-outlined text-gray-400 text-2xl">view_kanban</span>
             </div>

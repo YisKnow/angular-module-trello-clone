@@ -11,10 +11,7 @@ import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 @Component({
   selector: 'app-register-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgIf,
-  ],
+  imports: [ReactiveFormsModule, NgIf],
   templateUrl: './register-form.component.html',
 })
 export class RegisterFormComponent {
@@ -41,9 +38,7 @@ export class RegisterFormComponent {
       confirmPassword: ['', [Validators.required]],
     },
     {
-      validators: [
-        CustomValidators.MatchValidator('password', 'confirmPassword'),
-      ],
+      validators: [CustomValidators.MatchValidator('password', 'confirmPassword')],
     },
   );
   errorMessage = '';
@@ -53,11 +48,15 @@ export class RegisterFormComponent {
   statusUser: 'init' | 'loading' | 'success' | 'failed' = 'init';
 
   // ponytail: AsyncSignal pattern — see shared/utils/async-signal.ts.
-  private readonly _registerAsync = toAsyncSignal<{ name: string; email: string; password: string }, unknown>({
+  private readonly _registerAsync = toAsyncSignal<
+    { name: string; email: string; password: string },
+    unknown
+  >({
     subject: this.registerSubject,
-    action: ({ name, email, password }) =>
-      this.authFacade.registerAndLogin(name, email, password),
-    onStart: () => { this.status = 'loading'; },
+    action: ({ name, email, password }) => this.authFacade.registerAndLogin(name, email, password),
+    onStart: () => {
+      this.status = 'loading';
+    },
     onSuccess: () => {
       this.status = 'success';
       this.router.navigate(['/app/boards']);
@@ -73,7 +72,9 @@ export class RegisterFormComponent {
   private readonly _validateAsync = toAsyncSignal<{ email: string }, boolean>({
     subject: this.validateSubject,
     action: ({ email }) => this.authFacade.isAvailable(email),
-    onStart: () => { this.statusUser = 'loading'; },
+    onStart: () => {
+      this.statusUser = 'loading';
+    },
     onSuccess: (isAvailable, { email }) => {
       this.statusUser = 'success';
       if (isAvailable) {

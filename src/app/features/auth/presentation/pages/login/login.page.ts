@@ -8,12 +8,7 @@ import { BackgroundComponent } from '@features/auth/presentation/components/back
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    RouterLink,
-    NgOptimizedImage,
-    LoginFormComponent,
-    BackgroundComponent,
-  ],
+  imports: [RouterLink, NgOptimizedImage, LoginFormComponent, BackgroundComponent],
   templateUrl: './login.page.html',
 })
 export class LoginPage {}

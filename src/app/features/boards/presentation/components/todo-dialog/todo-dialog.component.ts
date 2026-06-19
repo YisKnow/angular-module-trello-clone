@@ -1,7 +1,6 @@
 import { Component, Inject, signal } from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 
-import { ButtonComponent } from '@shared/components/button/button.component';
 import { Card } from '@boards/domain/entities/card.entity';
 
 interface InputData {
@@ -16,7 +15,6 @@ interface OutputData {
 @Component({
   selector: 'app-todo-dialog',
   standalone: true,
-  imports: [ButtonComponent],
   templateUrl: './todo-dialog.component.html',
 })
 export class TodoDialogComponent {

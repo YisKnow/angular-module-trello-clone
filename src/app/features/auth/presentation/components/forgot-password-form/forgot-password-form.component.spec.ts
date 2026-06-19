@@ -12,7 +12,9 @@ import { FormField, FormRoot, form, schema, required, email } from '@angular/for
     <h1 class="text-center font-bold py-2 text-gray-700">Can't log in?</h1>
     <form [formRoot]="form" class="space-y-4">
       <div>
-        <label for="forgot-email" class="block text-xs font-semibold my-2">We'll send a recovery link to</label>
+        <label for="forgot-email" class="block text-xs font-semibold my-2"
+          >We'll send a recovery link to</label
+        >
         <div class="relative">
           <input
             id="forgot-email"

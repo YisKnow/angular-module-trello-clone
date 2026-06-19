@@ -1,7 +1,7 @@
 import { Injectable, Signal, inject, signal } from '@angular/core';
 
 import { User } from '@features/auth/domain/entities/user.entity';
-import { MeRepository, ME_REPOSITORY } from '@features/auth/domain/repositories/me.repository';
+import { ME_REPOSITORY } from '@features/auth/application/tokens/auth-tokens';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileFacade {

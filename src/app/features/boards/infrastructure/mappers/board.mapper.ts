@@ -1,18 +1,18 @@
+// Mappers for the boards feature.
+//
+// Pure functions — no Angular, no HTTP. They translate wire DTOs
+// (declared in infrastructure/dtos) into the domain entities declared
+// in domain/entities. Cross-feature user mapping is delegated to
+// AuthMapper to keep the contract surface explicit.
+
+import { AuthMapper } from '@features/auth/infrastructure/mappers/auth.mapper';
+import { User } from '@features/auth/domain/entities/user.entity';
+
 import { Board, BoardSummary } from '../../domain/entities/board.entity';
 import { Card } from '../../domain/entities/card.entity';
 import { List } from '../../domain/entities/list.entity';
-import { User } from '@features/auth/domain/entities/user.entity';
-import { UserDto } from '@features/auth/application/dtos/auth.dto';
-import { AuthMapper } from '@features/auth/application/mappers/auth.mapper';
-import {
-  BoardDto,
-  BoardSummaryDto,
-  CardDto,
-  ListDto,
-} from '../dtos/board.dto';
+import { BoardDto, BoardSummaryDto, CardDto, ListDto } from '../dtos/board.dto';
 
-// Pure mappers — convert wire DTOs to domain entities (and back when
-// needed for create/update payloads).
 export const BoardMapper = {
   toDomain(dto: BoardDto): Board {
     return {
@@ -73,6 +73,13 @@ function toCard(dto: CardDto): Card {
   return CardMapper.toDomain(dto);
 }
 
-function toUser(dto: UserDto): User {
+function toUser(dto: {
+  id: number;
+  name: string;
+  email: string;
+  avatar: string;
+  creationAt: string;
+  updatedAt: string;
+}): User {
   return AuthMapper.toUser(dto);
 }

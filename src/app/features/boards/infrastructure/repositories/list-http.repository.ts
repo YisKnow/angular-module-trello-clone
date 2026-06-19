@@ -8,14 +8,11 @@ import { environment } from '@environments/environment';
 import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { List } from '../../domain/entities/list.entity';
-import {
-  CreateListInput,
-  ListRepository,
-} from '../../domain/repositories/list.repository';
-import { ListMapper } from '../../application/mappers/board.mapper';
-import { ListDto } from '../../application/dtos/board.dto';
+import { CreateListInput, ListRepository } from '../../application/contracts/board-contracts';
+import { ListMapper } from '../mappers/board.mapper';
+import { ListDto } from '../dtos/board.dto';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class ListHttpRepository implements ListRepository {
   private readonly apiUrl = environment.API_URL;
 

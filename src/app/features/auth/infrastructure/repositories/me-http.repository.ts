@@ -8,12 +8,11 @@ import { environment } from '@environments/environment';
 import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { User } from '../../domain/entities/user.entity';
-import { MeRepository } from '../../domain/repositories/me.repository';
-import { BoardSummary } from '@boards/domain/entities/board.entity';
-import { AuthMapper } from '../../application/mappers/auth.mapper';
-import { BoardMapper } from '@boards/application/mappers/board.mapper';
-import { BoardSummaryDto } from '@boards/application/dtos/board.dto';
-import { UserDto as AuthUserDto } from '../../application/dtos/auth.dto';
+import { MeRepository } from '../../application/contracts/auth-contracts';
+import { AuthMapper } from '../mappers/auth.mapper';
+import { UserDto as AuthUserDto } from '../dtos/auth.dto';
+import { BoardMapper } from '@boards/infrastructure/mappers/board.mapper';
+import { BoardSummaryDto } from '@boards/infrastructure/dtos/board.dto';
 
 @Injectable({ providedIn: 'root' })
 export class MeHttpRepository implements MeRepository {
@@ -30,7 +29,7 @@ export class MeHttpRepository implements MeRepository {
     return AuthMapper.toUser(dto);
   }
 
-  async getMeBoards(): Promise<BoardSummary[]> {
+  async getMyBoards() {
     const dtos = await firstValueFrom(
       this.http.get<BoardSummaryDto[]>(`${this.apiUrl}/api/v1/me/boards`, {
         context: checkToken(),
