@@ -11,6 +11,14 @@ export interface BoardDto {
   cards: CardDto[];
 }
 
+// ponytail: list endpoints return a leaner shape; no members/lists/cards.
+export interface BoardSummaryDto {
+  id: string;
+  title: string;
+  backgroundColor: Colors;
+  creationAt?: string;
+}
+
 export interface ListDto {
   id: string;
   title: string;

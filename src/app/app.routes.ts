@@ -14,7 +14,7 @@ export const appRoutes: Routes = [
     path: 'app',
     canActivate: [authGuard],
     loadChildren: () =>
-      import('./modules/layout/layout.routes').then((m) => m.LAYOUT_ROUTES),
+      import('./core/layout/layout.routes').then((m) => m.LAYOUT_ROUTES),
   },
   {
     path: '**',

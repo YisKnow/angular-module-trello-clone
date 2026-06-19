@@ -12,3 +12,10 @@ export interface Board {
   lists: List[];
   cards: Card[];
 }
+
+// ponytail: lean shape for list endpoints — full Board not needed there.
+export interface BoardSummary {
+  id: string;
+  title: string;
+  backgroundColor: Colors;
+}

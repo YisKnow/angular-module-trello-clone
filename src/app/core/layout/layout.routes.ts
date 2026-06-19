@@ -23,7 +23,7 @@ export const LAYOUT_ROUTES: Routes = [
         path: 'profile',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('@modules/profile/profile.routes').then(
+          import('@features/profile/presentation/profile.routes').then(
             (m) => m.PROFILE_ROUTES,
           ),
       },
@@ -31,7 +31,7 @@ export const LAYOUT_ROUTES: Routes = [
         path: 'users',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('@modules/users/users.routes').then((m) => m.USERS_ROUTES),
+          import('@features/users/presentation/users.routes').then((m) => m.USERS_ROUTES),
       },
     ],
   },

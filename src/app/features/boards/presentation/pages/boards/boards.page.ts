@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CdkAccordionModule } from '@angular/cdk/accordion';
 import { defer, from } from 'rxjs';
 
-import { Board } from '@boards/domain/entities/board.entity';
+import { BoardSummary } from '@boards/domain/entities/board.entity';
 import { CardColorComponent } from '@shared/components/card-color/card-color.component';
 
 // Lists the boards the current user owns. The MeService-backed
@@ -29,6 +29,6 @@ export class BoardsPage {
   // ponytail: rxResource replaces Subject+switchMap+toSignal
   readonly boards = rxResource({
     stream: () => defer(() => from(this.meRepository.getMeBoards())),
-    defaultValue: [] as Board[],
+    defaultValue: [] as BoardSummary[],
   });
 }

@@ -25,7 +25,7 @@
     ],
     "paths": {
       "@models/*": [
-        "./src/app/models/*"
+        "./src/app/shared/models/*"
       ],
       "@shared/*": [
         "./src/app/shared/*"
@@ -37,10 +37,7 @@
         "./src/app/features/boards/*"
       ],
       "@layout/*": [
-        "./src/app/modules/layout/*"
-      ],
-      "@modules/*": [
-        "./src/app/modules/*"
+        "./src/app/core/layout/*"
       ],
       "@environments/*": [
         "./src/environments/*"

@@ -9,10 +9,10 @@ import { checkToken } from '@core/interceptors/token.interceptor';
 
 import { User } from '../../domain/entities/user.entity';
 import { MeRepository } from '../../domain/repositories/me.repository';
-import { Board } from '@boards/domain/entities/board.entity';
+import { BoardSummary } from '@boards/domain/entities/board.entity';
 import { AuthMapper } from '../../application/mappers/auth.mapper';
 import { BoardMapper } from '@boards/application/mappers/board.mapper';
-import { BoardDto } from '@boards/application/dtos/board.dto';
+import { BoardSummaryDto } from '@boards/application/dtos/board.dto';
 import { UserDto as AuthUserDto } from '../../application/dtos/auth.dto';
 
 @Injectable({ providedIn: 'root' })
@@ -30,12 +30,12 @@ export class MeHttpRepository implements MeRepository {
     return AuthMapper.toUser(dto);
   }
 
-  async getMeBoards(): Promise<Board[]> {
+  async getMeBoards(): Promise<BoardSummary[]> {
     const dtos = await firstValueFrom(
-      this.http.get<BoardDto[]>(`${this.apiUrl}/api/v1/me/boards`, {
+      this.http.get<BoardSummaryDto[]>(`${this.apiUrl}/api/v1/me/boards`, {
         context: checkToken(),
       }),
     );
-    return dtos.map(BoardMapper.toDomain);
+    return dtos.map(BoardMapper.toSummary);
   }
 }

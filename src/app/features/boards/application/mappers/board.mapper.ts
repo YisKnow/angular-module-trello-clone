@@ -1,4 +1,4 @@
-import { Board } from '../../domain/entities/board.entity';
+import { Board, BoardSummary } from '../../domain/entities/board.entity';
 import { Card } from '../../domain/entities/card.entity';
 import { List } from '../../domain/entities/list.entity';
 import { User } from '@features/auth/domain/entities/user.entity';
@@ -6,6 +6,7 @@ import { UserDto } from '@features/auth/application/dtos/auth.dto';
 import { AuthMapper } from '@features/auth/application/mappers/auth.mapper';
 import {
   BoardDto,
+  BoardSummaryDto,
   CardDto,
   ListDto,
 } from '../dtos/board.dto';
@@ -21,6 +22,13 @@ export const BoardMapper = {
       members: dto.members.map(toUser),
       lists: dto.lists.map(toList),
       cards: dto.cards.map(toCard),
+    };
+  },
+  toSummary(dto: BoardSummaryDto): BoardSummary {
+    return {
+      id: dto.id,
+      title: dto.title,
+      backgroundColor: dto.backgroundColor,
     };
   },
 };

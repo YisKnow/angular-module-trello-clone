@@ -1,5 +1,3 @@
-import { InjectionToken } from '@angular/core';
-
 import { Card } from '../entities/card.entity';
 import { List } from '../entities/list.entity';
 
