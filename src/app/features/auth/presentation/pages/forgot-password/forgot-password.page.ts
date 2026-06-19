@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { HeaderComponent } from '@features/auth/presentation/components/header/header.component';
-import { FooterComponent } from '@features/auth/presentation/components/footer/footer.component';
 import { ForgotPasswordFormComponent } from '@features/auth/presentation/components/forgot-password-form/forgot-password-form.component';
 import { BackgroundComponent } from '@features/auth/presentation/components/background/background.component';
 
@@ -11,8 +9,6 @@ import { BackgroundComponent } from '@features/auth/presentation/components/back
   standalone: true,
   imports: [
     RouterLink,
-    HeaderComponent,
-    FooterComponent,
     ForgotPasswordFormComponent,
     BackgroundComponent,
   ],

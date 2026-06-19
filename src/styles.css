@@ -1,8 +1,41 @@
 @import '@material-symbols/font-400/outlined.css';
-
-/* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
 @config '../tailwind.config.js';
 @plugin '@tailwindcss/forms';
-
 @import '@angular/cdk/overlay-prebuilt.css';
+
+/* ==============================================================
+ * Minimalist-ui pastel theme
+ * Warm monochrome palette, desaturated accents, editorial typography
+ * ============================================================== */
+
+/* Typography — system native sans-serif stack */
+body {
+  font-family: 'SF Pro Display', 'Geist Sans', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+  color: #2F3437;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+@theme {
+  /* Background / surface — warm off-white bone */
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F7F6F3;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-inverse: #2F3437;
+
+  /* Text — off-black charcoal, not pure #000 */
+  --color-text-primary: #2F3437;
+  --color-text-secondary: #787774;
+  --color-text-muted: #9C9C94;
+  --color-text-disabled: #B8B8B0;
+
+  /* Radius — crisp, max 12px */
+  --radius-card: 0.75rem;
+  --radius-button: 0.375rem;
+  --radius-input: 0.375rem;
+
+  /* Borders — minimalist-ui uses border: 1px solid #EAEAEA instead of shadows */
+  --color-border-default: #EAEAEA;
+  --color-border-muted: #F0F0EE;
+}

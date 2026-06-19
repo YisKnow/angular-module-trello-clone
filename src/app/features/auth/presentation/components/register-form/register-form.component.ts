@@ -7,7 +7,6 @@ import { NgIf } from '@angular/common';
 
 // ponytail: type inlined, was @shared/models/request-status.model
 
-import { ButtonComponent } from '@shared/components/button/button.component';
 import { CustomValidators } from '@shared/utils/validators';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 
@@ -17,7 +16,6 @@ import { AuthFacade } from '@features/auth/application/facades/auth.facade';
   imports: [
     ReactiveFormsModule,
     NgIf,
-    ButtonComponent,
   ],
   templateUrl: './register-form.component.html',
 })

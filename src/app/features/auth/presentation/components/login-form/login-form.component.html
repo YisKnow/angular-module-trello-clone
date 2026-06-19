@@ -1,70 +1,68 @@
-<h1 class="text-center font-bold py-2 text-gray-700">Log in to Trello</h1>
-<form [formRoot]="form" class="space-y-4">
+<form [formRoot]="form" class="space-y-5">
+  <!-- Email -->
   <div>
-    <div class="relative">
-      <input
-        [formField]="form.email"
-        placeholder="Enter email"
-        type="email"
-        class="w-full rounded bg-gray-100 border-gray-300 border-2"
-      />
-      <button type="button" class="p-2 absolute right-2" (click)="form.email().focusBoundControl()">
-        <span class="material-symbols-outlined">edit</span>
-      </button>
-    </div>
+    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+    <input
+      id="login-email"
+      [formField]="form.email"
+      placeholder="Enter your email address"
+      type="email"
+      class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+    />
     @if (form.email().touched() && form.email().invalid()) {
       <div>
         @if (form.email().getError('required')) {
-          <p class="font-medium text-red-500 text-xs mt-1 ml-1">
-            This field is mandatory
-          </p>
+          <p class="text-red-500 text-xs mt-1">This field is required</p>
         }
         @if (form.email().getError('email')) {
-          <p class="font-medium text-red-500 text-xs mt-1 ml-1">
-            This field should be a email
-          </p>
+          <p class="text-red-500 text-xs mt-1">Please enter a valid email address</p>
         }
       </div>
     }
   </div>
+
+  <!-- Password -->
   <div>
+    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
     <div class="relative">
       <input
+        id="login-password"
         [formField]="form.password"
-        placeholder="Enter password"
+        placeholder="Enter your password"
         [type]="showPassword ? 'text' : 'password'"
-        class="w-full rounded bg-gray-100 border-gray-300 border-2"
+        class="w-full rounded-lg border border-[#EAEAEA] px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150 focus:ring-2 focus:ring-primary-300 focus:border-transparent pr-10"
       />
-      <button type="button" class="p-2 absolute right-2" (click)="showPassword = !showPassword">
-        <span class="material-symbols-outlined">{{ showPassword ? 'visibility' : 'visibility_off' }}</span>
+      <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors" (click)="showPassword = !showPassword">
+        <span class="material-symbols-outlined text-[18px]">{{ showPassword ? 'visibility' : 'visibility_off' }}</span>
       </button>
     </div>
     @if (form.password().touched() && form.password().invalid()) {
       <div>
         @if (form.password().getError('required')) {
-          <p class="font-medium text-red-500 text-xs mt-1 ml-1">
-            This field is mandatory
-          </p>
+          <p class="text-red-500 text-xs mt-1">This field is required</p>
         }
         @if (form.password().getError('minLength')) {
-          <p class="font-medium text-red-500 text-xs mt-1 ml-1">
-            This field should be greater than 6 characters
-          </p>
+          <p class="text-red-500 text-xs mt-1">Must be at least 6 characters</p>
         }
       </div>
     }
   </div>
+
   @if (status === 'failed') {
-    <div>
-      <p class="font-medium text-red-500 text-xs mt-1 ml-1">{{ errorMessage }}</p>
+    <div class="rounded-lg bg-danger-100 border border-danger-200 px-4 py-3">
+      <p class="text-sm text-danger-800">{{ errorMessage }}</p>
     </div>
   }
-  <div>
-    <app-btn
-      typeBtn="submit"
-      color="success"
-      [loading]="status === 'loading'"
-      >Login</app-btn
-    >
-  </div>
+
+  <!-- Submit -->
+  <button
+    type="submit"
+    [disabled]="status === 'loading'"
+    class="w-full rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2.5 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    @if (status === 'loading') {
+      <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span>
+    }
+    Log in
+  </button>
 </form>

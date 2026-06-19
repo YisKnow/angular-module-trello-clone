@@ -1,73 +1,54 @@
-<div class="container mx-auto flex mt-10">
-  <div class="w-1/5 mr-4">
-    <ul class="flex flex-col font-medium text-gray-700 mb-5">
-      <li>
-        <a class="block bg-sky-100 rounded py-1 px-3 text-sky-700"
-          ><span class="material-symbols-outlined">view_kanban</span> Boards</a
-        >
-      </li>
-      <li>
-        <a class="block py-1 px-3"
-          ><span class="material-symbols-outlined">inventory_2</span> Templates</a
-        >
-      </li>
-      <li>
-        <a class="block py-1 px-3"
-          ><span class="material-symbols-outlined">home</span> Home</a
-        >
-      </li>
-    </ul>
-
-    <cdk-accordion>
-      <cdk-accordion-item #accordionMenu="cdkAccordionItem">
-        <button class="w-full py-1 px-2 flex justify-between items-center" type="button" (click)="accordionMenu.toggle()">
-          My workspace
-          <span class="material-symbols-outlined">{{ accordionMenu.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
-        </button>
-        <div [style.display]="accordionMenu.expanded ? '' : 'none' ">
-          <ul class="ml-2 flex flex-col text-sm text-gray-700">
-            <li>
-              <a class="block py-1 px-3"
-                ><span class="material-symbols-outlined">view_kanban</span> Boards</a
-              >
-            </li>
-            <li>
-              <a class="block py-1 px-3"
-                ><span class="material-symbols-outlined">favorite</span> Highlights</a
-              >
-            </li>
-            <li>
-              <a class="block py-1 px-3"
-                ><span class="material-symbols-outlined">grid_view</span> Views</a
-              >
-            </li>
-            <li>
-              <a class="block py-1 px-3"
-                ><span class="material-symbols-outlined">group</span> Members</a
-              >
-            </li>
-            <li>
-              <a class="block py-1 px-3"
-                ><span class="material-symbols-outlined">settings</span> Settings</a
-              >
-            </li>
-          </ul>
-        </div>
-      </cdk-accordion-item>
-    </cdk-accordion>
+<div class="max-w-7xl mx-auto px-6 py-8">
+  <!-- Page header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Your boards</h1>
+    <p class="text-sm text-gray-500 mt-1">{{ boards.value().length }} {{ boards.value().length === 1 ? 'board' : 'boards' }}</p>
   </div>
-  <div class="w-full">
-    <h1 class="text-lg font-bold mb-4"><span class="material-symbols-outlined">schedule</span> Recently viewed</h1>
-    <div class="grid grid-cols-4 gap-4">
-      @for (board of boards.value(); track board.id) {
-        <a [routerLink]="['/app/boards', board.id]">
-          <app-card-color [color]="board.backgroundColor">
-            {{ board.title }}
-          </app-card-color>
-        </a>
-      } @empty {
-        <p class="text-sm text-gray-500">No boards yet. Create one to get started.</p>
+
+  @if (boards.isLoading()) {
+    <div data-testid="boards-skeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      @for (placeholder of [0, 1, 2, 3]; track placeholder) {
+        <div class="rounded-xl overflow-hidden border border-[#EAEAEA] bg-white">
+          <app-skeleton variant="card" height="5.5rem"></app-skeleton>
+          <div class="p-3.5">
+            <app-skeleton variant="text" width="70%" height="0.875rem"></app-skeleton>
+          </div>
+        </div>
       }
     </div>
-  </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      @for (board of boards.value(); track board.id) {
+        <a
+          [routerLink]="['/app/boards', board.id]"
+          class="group block rounded-xl overflow-hidden bg-white border border-[#EAEAEA] hover:border-gray-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-all duration-200"
+        >
+          <!-- Color band as the board's "cover" -->
+          <div class="h-20 w-full transition-all duration-200 group-hover:h-24" [ngClass]="coverClass(board.backgroundColor)"></div>
+          <!-- Title area -->
+          <div class="p-4">
+            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ board.title }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Click to open</p>
+          </div>
+        </a>
+      } @empty {
+        <div data-testid="empty-state" class="col-span-full">
+          <div class="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-gray-400 text-2xl">view_kanban</span>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900">No boards yet</h2>
+            <p class="text-sm text-gray-500 mt-1 mb-6">Create your first board to get started.</p>
+            <button
+              type="button"
+              (click)="isOpenOverlayCreateBoard = true"
+              class="rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-5 py-2.5 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+            >
+              Create your first board
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>

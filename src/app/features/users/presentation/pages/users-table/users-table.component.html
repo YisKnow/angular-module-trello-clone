@@ -1,50 +1,80 @@
-<div class="w-full h-full grow bg-white-600 p-6">
-  <div class="container mx-auto">
-    <h1 class="text-xl text-gray-700 font-semibold italic mb-5">Hola, {{ user()?.name }}</h1>
-    <button (click)="users.reload()">refresh</button>
-    <table
-      class="w-full text-sm text-left text-gray-500"
-      cdk-table
-      [dataSource]="users.value()"
-    >
-      <tr
-        cdk-header-row
-        class="text-xs text-gray-700 uppercase bg-gray-50"
-        *cdkHeaderRowDef="columns"
-      ></tr>
-      <tr
-        cdk-row
-        class="bg-white border-b"
-        *cdkRowDef="let row; columns: columns"
-      ></tr>
+<div class="w-full h-full grow p-6">
+  <div class="max-w-5xl mx-auto">
+    <!-- Page header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Users</h1>
+        <p class="text-sm text-gray-500 mt-1">Welcome, {{ user()?.name }}</p>
+      </div>
+      <button
+        type="button"
+        (click)="users.reload()"
+        data-testid="refresh-btn"
+        title="Refresh"
+        aria-label="Refresh"
+        class="rounded-lg border border-[#EAEAEA] hover:bg-gray-100 p-2.5 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary-300"
+      >
+        <span class="material-symbols-outlined text-gray-600">refresh</span>
+      </button>
+    </div>
 
-      <!-- Id Column -->
-      <ng-container cdkColumnDef="id">
-        <th cdk-header-cell class="py-3 px-6" *cdkHeaderCellDef>#Id</th>
-        <td cdk-cell class="py-4 px-6" *cdkCellDef="let row">{{ row.id }}</td>
-      </ng-container>
+    <!-- Users table card -->
+    <div class="bg-white rounded-xl border border-[#EAEAEA] overflow-hidden">
+      <table
+        class="w-full text-sm text-left"
+        cdk-table
+        [dataSource]="users.value()"
+      >
+        <tr
+          cdk-header-row
+          class="text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50"
+          *cdkHeaderRowDef="columns"
+        ></tr>
+        <tr
+          cdk-row
+          class="bg-white border-b border-[#EAEAEA] hover:bg-gray-50 transition-colors duration-150 last:border-b-0"
+          *cdkRowDef="let row; columns: columns"
+        ></tr>
 
-      <!-- Avatar Column -->
-      <ng-container cdkColumnDef="avatar">
-        <th cdk-header-cell class="py-3 px-6" *cdkHeaderCellDef>Avatar</th>
-        <td cdk-cell class="py-4 px-6" *cdkCellDef="let row">
-          <img class="w-20" [src]="row.avatar" alt="" />
-        </td>
-      </ng-container>
+        <!-- Id Column -->
+        <ng-container cdkColumnDef="id">
+          <th cdk-header-cell class="py-3.5 px-6" *cdkHeaderCellDef>ID</th>
+          <td cdk-cell class="py-4 px-6 text-gray-500 font-mono text-xs" *cdkCellDef="let row">{{ row.id }}</td>
+        </ng-container>
 
-      <!-- Name Column -->
-      <ng-container cdkColumnDef="name">
-        <th cdk-header-cell class="py-3 px-6" *cdkHeaderCellDef>Name</th>
-        <td cdk-cell class="py-4 px-6" *cdkCellDef="let row">{{ row.name }}</td>
-      </ng-container>
+        <!-- Avatar Column -->
+        <ng-container cdkColumnDef="avatar">
+          <th cdk-header-cell class="py-3.5 px-6" *cdkHeaderCellDef>Avatar</th>
+          <td cdk-cell class="py-4 px-6" *cdkCellDef="let row">
+            <app-avatar [seed]="row" [size]="36" />
+          </td>
+        </ng-container>
 
-      <!-- Email Column -->
-      <ng-container cdkColumnDef="email">
-        <th cdk-header-cell class="py-3 px-6" *cdkHeaderCellDef>Email</th>
-        <td cdk-cell class="py-4 px-6" *cdkCellDef="let row">
-          {{ row.email }}
-        </td>
-      </ng-container>
-    </table>
+        <!-- Name Column -->
+        <ng-container cdkColumnDef="name">
+          <th cdk-header-cell class="py-3.5 px-6" *cdkHeaderCellDef>Name</th>
+          <td cdk-cell class="py-4 px-6 font-medium text-gray-900" *cdkCellDef="let row">{{ row.name }}</td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container cdkColumnDef="email">
+          <th cdk-header-cell class="py-3.5 px-6" *cdkHeaderCellDef>Email</th>
+          <td cdk-cell class="py-4 px-6 text-gray-500" *cdkCellDef="let row">{{ row.email }}</td>
+        </ng-container>
+      </table>
+
+      @if (users.isLoading()) {
+        <div data-testid="users-skeleton" class="p-4">
+          @for (placeholder of [0, 1, 2, 3, 4]; track placeholder) {
+            <div class="flex items-center gap-4 py-3 border-b border-[#EAEAEA] last:border-b-0">
+              <span class="block w-8 h-3 rounded bg-gray-100 animate-pulse-skeleton"></span>
+              <span class="block w-9 h-9 rounded-full bg-gray-100 animate-pulse-skeleton"></span>
+              <span class="block w-32 h-3 rounded bg-gray-100 animate-pulse-skeleton"></span>
+              <span class="block w-44 h-3 rounded bg-gray-100 animate-pulse-skeleton"></span>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </div>
 </div>

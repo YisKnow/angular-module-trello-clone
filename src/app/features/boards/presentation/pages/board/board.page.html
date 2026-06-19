@@ -1,56 +1,96 @@
-<div class="w-full h-full px-4 pb-4" [ngClass]="colors">
+<div class="w-full h-full px-6 pb-6" [ngClass]="colors">
   <div class="flex flex-col h-full">
-    <div>
-      <h2 class="text-xl font-bold text-white my-4">{{ board()?.title }}</h2>
+    <!-- Board header with title + card count -->
+    <div class="flex items-center gap-3 py-4">
+      <h2 class="text-2xl font-bold text-gray-900">{{ board()?.title }}</h2>
+      <span class="text-sm text-gray-500 bg-white/60 rounded-full px-3 py-0.5">
+        {{ board()?.lists?.length || 0 }} lists
+      </span>
     </div>
-    <div class="flex grow items-start w-full h-full overflow-x-scroll" cdkDropListGroup>
-      @for (list of board()?.lists ?? []; track list.id) {
-        <div class="rounded bg-gray-200 w-72 p-2 mr-3 shrink-0">
-          <div class="flex justify-between py-1">
-            <h3 class="text-sm font-bold ml-2">{{ list.title }}</h3>
-          </div>
-
-          <div class="text-sm mt-2 min-h-[2.5rem]" [id]="list.id" cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListData]="list.cards">
-            @for (card of list.cards; track card.id) {
-              <div
-                (click)="openDialog(card)"
-                cdkDrag
-                class="bg-white shadow p-2 rounded mt-2 border-b border-x-gray-300 cursor-pointer hover:bg-gray-400"
-              >
-                {{ card.title }}
-              </div>
-            }
-          </div>
-          <div class="mt-5">
-            @if (!isCardFormOpen(list)) {
-              <app-btn color="light" (click)="openFormCard(list)">Add a card</app-btn>
-            }
-            @if (isCardFormOpen(list)) {
-              <div class="w-full">
-                <textarea [formControl]="inputCard" class="w-full"></textarea>
-                <div class="flex space-x-2 justify-between">
-                  <app-btn color="success" (click)="createCard(list)">Create</app-btn>
-                  <app-btn color="light" (click)="closeCardForm()">Close</app-btn>
+    @if (board(); as currentBoard) {
+      <div class="flex grow items-start w-full h-full overflow-x-auto pb-4 gap-4" cdkDropListGroup>
+        @for (list of currentBoard.lists; track list.id) {
+          <div class="flex flex-col w-72 shrink-0 bg-gray-100/80 rounded-xl border border-[#EAEAEA] max-h-full">
+            <!-- List header with title + card count -->
+            <div class="flex items-center justify-between px-4 pt-3 pb-2">
+              <h3 class="text-sm font-semibold text-gray-900">{{ list.title }}</h3>
+              <span class="text-xs text-gray-400 bg-white rounded-full px-2 py-0.5">{{ list.cards.length }}</span>
+            </div>
+            <!-- Cards container -->
+            <div class="flex-1 overflow-y-auto px-3 pb-2 min-h-[3rem]" [id]="list.id" cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListData]="list.cards">
+              @for (card of list.cards; track card.id) {
+                <div
+                  (click)="openDialog(card)"
+                  cdkDrag
+                  class="bg-white rounded-lg border-l-4 border-l-gray-400 border border-[#EAEAEA] p-3 mt-2 cursor-pointer hover:border-l-gray-600 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] active:scale-[0.98] transition-all duration-150 first:mt-0"
+                >
+                  <p class="text-sm font-medium text-gray-800">{{ card.title }}</p>
                 </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
-      <div class="shrink-0">
-        @if (!showListForm) {
-          <app-btn color="light" (click)="showListForm = !showListForm">Add another list</app-btn>
-        }
-        @if (showListForm) {
-          <div class="w-full">
-            <textarea [formControl]="inputList" class="w-full"></textarea>
-            <div class="flex space-x-2 justify-between">
-              <app-btn color="success" (click)="addList()">Create</app-btn>
-              <app-btn color="light" (click)="showListForm = !showListForm">Close</app-btn>
+              }
+              <!-- Drop placeholder for empty lists -->
+              <div class="h-1"></div>
+            </div>
+            <!-- Add card button -->
+            <div class="px-3 pb-3">
+              @if (!isCardFormOpen(list)) {
+                <button
+                  type="button"
+                  (click)="openFormCard(list)"
+                  class="w-full rounded-lg text-gray-500 hover:text-gray-700 hover:bg-white/60 transition-all duration-150 font-medium text-sm px-3 py-2 text-left"
+                >+ Add a card</button>
+              }
+              @if (isCardFormOpen(list)) {
+                <div class="w-full">
+                  <textarea
+                    [formControl]="inputCard"
+                    class="w-full border border-[#EAEAEA] rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-150 resize-none"
+                    rows="2"
+                    placeholder="Enter card title…"
+                  ></textarea>
+                  <div class="flex items-center gap-2 mt-2">
+                    <button type="button" (click)="createCard(list)" class="rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium px-4 py-2 transition-colors duration-150">Create</button>
+                    <button type="button" (click)="closeCardForm()" class="rounded-lg text-gray-500 hover:text-gray-700 text-sm px-3 py-2 transition-colors duration-150">Close</button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         }
+        <div class="shrink-0 w-72">
+          @if (!showListForm) {
+            <button
+              type="button"
+              (click)="showListForm = !showListForm"
+              class="w-full rounded-xl text-gray-600 bg-gray-200/60 hover:bg-gray-200 hover:text-gray-800 transition-all duration-150 font-medium text-sm px-4 py-3 text-left"
+            >+ Add another list</button>
+          }
+          @if (showListForm) {
+            <div class="rounded-xl bg-gray-100/80 border border-[#EAEAEA] p-3">
+              <textarea
+                [formControl]="inputList"
+                class="w-full border border-[#EAEAEA] rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-150 resize-none"
+                rows="2"
+                placeholder="Enter list title…"
+              ></textarea>
+              <div class="flex items-center gap-2 mt-2">
+                <button type="button" (click)="addList()" class="rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium px-4 py-2 transition-colors duration-150">Create</button>
+                <button type="button" (click)="showListForm = !showListForm" class="rounded-lg text-gray-500 hover:text-gray-700 text-sm px-3 py-2 transition-colors duration-150">Close</button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    } @else {
+      <div data-testid="board-skeleton" class="flex grow items-start w-full h-full overflow-x-auto gap-4 pb-4">
+        @for (placeholder of [0, 1, 2]; track placeholder) {
+          <div class="rounded-xl bg-gray-100/80 w-72 p-3 shrink-0 border border-[#EAEAEA]">
+            <app-skeleton variant="text" width="60%" height="1.25rem"></app-skeleton>
+            @for (cardPlaceholder of [0, 1, 2]; track cardPlaceholder) {
+              <app-skeleton class="mt-2" variant="card" height="3.5rem"></app-skeleton>
+            }
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>

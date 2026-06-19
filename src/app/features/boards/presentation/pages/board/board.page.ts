@@ -23,7 +23,7 @@ import { Dialog, DialogModule } from '@angular/cdk/dialog';
 import { firstValueFrom } from 'rxjs';
 
 import { BACKGROUNDS } from '@shared/utils/colors.utils';
-import { ButtonComponent } from '@shared/components/button/button.component';
+import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
 import { Card } from '@boards/domain/entities/card.entity';
 import { List } from '@boards/domain/entities/list.entity';
 import { BoardFacade } from '@boards/application/facades/board.facade';
@@ -37,7 +37,7 @@ import { TodoDialogComponent } from '@boards/presentation/components/todo-dialog
     ReactiveFormsModule,
     DragDropModule,
     DialogModule,
-    ButtonComponent,
+    SkeletonComponent,
   ],
   templateUrl: './board.page.html',
   styles: [

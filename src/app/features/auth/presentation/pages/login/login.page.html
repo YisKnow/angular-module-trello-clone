@@ -1,22 +1,25 @@
-<div class="w-screen h-screen bg-white sm:bg-gray-50 relative">
+<div class="min-h-screen bg-[#F7F6F3] flex items-center justify-center p-4">
   <app-background></app-background>
-  <div class="relative w-full sm:w-7/12 md:w-6/12 lg:w-4/12 m-auto">
-    <app-header></app-header>
-    <div class="bg-white rounded shadow-none sm:shadow-lg py-4 px-4 md:px-9">
-      <div class="mb-4">
-        <app-login-form></app-login-form>
-      </div>
-      <hr class="my-4 border-b-1 border-r-gray-300" />
-      <div
-        class="flex justify-center items-center space-x-0 space-y-2 md:space-x-2 md:space-y-0 flex-col md:flex-row"
-      >
-        <a routerLink="/forgot-password" class="text-blue-600">Can't log in?</a>
-        <span class="text-gray-500 hidden md:block">•</span>
-        <a routerLink="/register" class="text-blue-600"
-          >Sign up for an account</a
-        >
+  <div class="w-full max-w-sm relative">
+    <!-- Logo centered above card -->
+    <div class="flex justify-center mb-8">
+      <img src="/assets/images/logo/logo-gradient-white-trello.png" alt="Trello" class="h-9" />
+    </div>
+
+    <!-- Login card -->
+    <div class="bg-white rounded-2xl border border-[#EAEAEA] p-8">
+      <app-login-form></app-login-form>
+
+      <div class="mt-6 pt-6 border-t border-[#EAEAEA]">
+        <div class="flex items-center justify-center gap-1 text-sm">
+          <a routerLink="/forgot-password" class="text-gray-500 hover:text-gray-700 transition-colors">Can't log in?</a>
+          <span class="text-gray-300 mx-1">·</span>
+          <a routerLink="/register" class="text-gray-500 hover:text-gray-700 transition-colors">Sign up for an account</a>
+        </div>
       </div>
     </div>
-    <app-footer></app-footer>
+
+    <!-- Footer -->
+    <p class="text-center text-xs text-gray-400 mt-8">© 2026 Trello Clone</p>
   </div>
 </div>

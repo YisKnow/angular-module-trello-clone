@@ -1,138 +1,99 @@
 import { Colors, ObjColors } from '@shared/models/colors.model';
 
-// CSS class maps for visual color application. Kept here (not in
-// colors.model) because they are presentation, not domain.
+// ponytail: minimalist-ui pastel palette — all values use desaturated,
+// muted colors matching the warm monochrome + pastel accent scheme.
+// Board key names (sky/yellow/green/red/etc.) preserved for backwards
+// compatibility with persisted API data.
+
 export const COLORS: ObjColors = {
     sky: {
-      'bg-sky-700': true,
-      'hover:bg-sky-800': true,
-      'text-white': true
+      'bg-primary-200': true,
+      'hover:bg-primary-300': true,
+      'text-gray-900': true,
     },
     yellow: {
-      'bg-yellow-700': true,
-      'hover:bg-yellow-800': true,
-      'text-white': true
+      'bg-warning-100': true,
+      'hover:bg-warning-200': true,
+      'text-warning-800': true,
     },
     green: {
-      'bg-green-700': true,
-      'hover:bg-green-800': true,
-      'text-white': true
+      'bg-success-200': true,
+      'hover:bg-success-300': true,
+      'text-success-800': true,
     },
     red: {
-      'bg-red-700': true,
-      'hover:bg-red-800': true,
-      'text-white': true
+      'bg-danger-200': true,
+      'hover:bg-danger-300': true,
+      'text-danger-800': true,
     },
     violet: {
-      'bg-violet-700': true,
-      'hover:bg-violet-800': true,
-      'text-white': true
+      'bg-primary-200': true,
+      'hover:bg-primary-300': true,
+      'text-gray-900': true,
     },
     gray: {
-      'bg-gray-700': true,
-      'hover:bg-gray-800': true,
-      'text-white': true
+      'bg-gray-200': true,
+      'hover:bg-gray-300': true,
+      'text-gray-900': true,
     },
     success: {
-      'bg-success-700': true,
-      'hover:bg-success-800': true,
+      'bg-success-200': true,
+      'hover:bg-success-300': true,
       'focus:ring-success-300': true,
-      'text-white': true,
+      'text-success-800': true,
     },
     primary: {
-      'bg-primary-700': true,
-      'hover:bg-primary-800': true,
+      'bg-primary-200': true,
+      'hover:bg-primary-300': true,
       'focus:ring-primary-300': true,
-      'text-white': true,
+      'text-gray-900': true,
     },
     danger: {
-      'bg-danger-700': true,
-      'hover:bg-danger-800': true,
+      'bg-danger-200': true,
+      'hover:bg-danger-300': true,
       'focus:ring-danger-300': true,
-      'text-white': true,
+      'text-danger-800': true,
     },
     light: {
-      'bg-gray-200': true,
-      'hover:bg-gray-500': true,
+      'bg-gray-100': true,
+      'hover:bg-gray-300': true,
       'focus:ring-gray-50': true,
       'text-gray-700': true,
     },
     info: {
-      'bg-info-700': true,
-      'hover:bg-info-800': true,
+      'bg-info-200': true,
+      'hover:bg-info-300': true,
       'focus:ring-info-300': true,
-      'text-white': true,
+      'text-gray-900': true,
     },
 }
 
+// ponytail: pastel backgrounds for board detail page — light, airy, no bright colors
 export const BACKGROUNDS : ObjColors = {
-    sky: {
-      'bg-sky-600': true,
-    },
-    yellow: {
-      'bg-yellow-600': true,
-    },
-    green: {
-      'bg-green-600': true,
-    },
-    red: {
-      'bg-red-600': true,
-    },
-    violet: {
-      'bg-violet-400': true,
-    },
-    gray: {
-      'bg-gray-600': true,
-    },
-    success: {
-      'bg-success-600': true,
-    },
-    primary: {
-      'bg-primary-600': true,
-    },
-    danger: {
-      'bg-danger-600': true,
-    },
-    light: {
-      'bg-gray-200': true,
-    },
-    info: {
-      'bg-info-600': true,
-    },
+    sky:       { 'bg-primary-200': true },
+    yellow:    { 'bg-warning-100': true },
+    green:     { 'bg-success-200': true },
+    red:       { 'bg-danger-200': true },
+    violet:    { 'bg-primary-100': true },
+    gray:      { 'bg-gray-200': true },
+    success:   { 'bg-success-200': true },
+    primary:   { 'bg-primary-200': true },
+    danger:    { 'bg-danger-200': true },
+    light:     { 'bg-gray-100': true },
+    info:      { 'bg-info-200': true },
 }
 
+// ponytail: navbar uses warm dark for all board colors — subtle, not distracting
 export const NAVBAR_BACKGROUNDS : ObjColors = {
-    sky: {
-      'bg-sky-700': true,
-    },
-    yellow: {
-      'bg-yellow-700': true,
-    },
-    green: {
-      'bg-green-700': true,
-    },
-    red: {
-      'bg-red-700': true,
-    },
-    violet: {
-      'bg-violet-700': true,
-    },
-    gray: {
-      'bg-gray-700': true,
-    },
-    success: {
-      'bg-success-700': true,
-    },
-    primary: {
-      'bg-primary-700': true,
-    },
-    danger: {
-      'bg-danger-700': true,
-    },
-    light: {
-      'bg-gray-700': true,
-    },
-    info: {
-      'bg-info-700': true,
-    },
+    sky:       { 'bg-gray-800': true },
+    yellow:    { 'bg-gray-800': true },
+    green:     { 'bg-gray-800': true },
+    red:       { 'bg-gray-800': true },
+    violet:    { 'bg-gray-800': true },
+    gray:      { 'bg-gray-800': true },
+    success:   { 'bg-gray-800': true },
+    primary:   { 'bg-gray-800': true },
+    danger:    { 'bg-gray-800': true },
+    light:     { 'bg-gray-800': true },
+    info:      { 'bg-gray-800': true },
 }

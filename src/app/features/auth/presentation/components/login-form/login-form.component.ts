@@ -14,13 +14,12 @@ import { Subject, catchError, exhaustMap, from, of, tap } from 'rxjs';
 
 // ponytail: type inlined, was @shared/models/request-status.model
 
-import { ButtonComponent } from '@shared/components/button/button.component';
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [FormField, FormRoot, ButtonComponent],
+  imports: [FormField, FormRoot],
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {

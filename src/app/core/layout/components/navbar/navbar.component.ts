@@ -4,9 +4,9 @@ import { Router, RouterLink } from '@angular/router';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { NAVBAR_BACKGROUNDS } from '@shared/utils/colors.utils';
 import { Colors } from '@shared/models/colors.model';
+import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
-import { ButtonComponent } from '@shared/components/button/button.component';
 import { BoardFormComponent } from '@layout/components/board-form/board-form.component';
 
 @Component({
@@ -16,7 +16,7 @@ import { BoardFormComponent } from '@layout/components/board-form/board-form.com
     RouterLink,
     NgClass,
     OverlayModule,
-    ButtonComponent,
+    AvatarComponent,
     BoardFormComponent,
   ],
   templateUrl: './navbar.component.html',
@@ -25,6 +25,7 @@ export class NavbarComponent {
   isOpenOverlayAvatar = false;
   isOpenOverlayBoards = false;
   isOpenOverlayCreateBoard = false;
+  isMobileMenuOpen = false;
 
   private readonly authFacade = inject(AuthFacade);
   private readonly router = inject(Router);
