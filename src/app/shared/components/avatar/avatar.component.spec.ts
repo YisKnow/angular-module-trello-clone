@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { AvatarComponent } from './avatar.component';
-import { avatarUrl, avatarFallbackUrl, avatarInitials } from '@shared/utils/avatar.util';
+import { avatarUrl, avatarInitials } from '@shared/utils/avatar.util';
 
 describe('AvatarComponent', () => {
   describe('avatarUrl helper', () => {
@@ -28,11 +28,11 @@ describe('AvatarComponent', () => {
     });
 
     it('returns the fallback SVG when seed is null', () => {
-      expect(avatarUrl(null)).toBe(avatarFallbackUrl);
+      expect(avatarUrl(null)).toMatch(/^data:image\/svg/);
     });
 
     it('returns the fallback SVG when seed is an empty object', () => {
-      expect(avatarUrl({})).toBe(avatarFallbackUrl);
+      expect(avatarUrl({})).toMatch(/^data:image\/svg/);
     });
   });
 

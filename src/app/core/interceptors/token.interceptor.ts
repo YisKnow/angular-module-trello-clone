@@ -59,7 +59,18 @@ function addToken(
   const authRequest = request.clone({
     headers: request.headers.set('Authorization', `Bearer ${accessToken}`),
   });
-  return next(authRequest);
+  return next(authRequest).pipe(
+    catchError((err) => {
+      // Server rejected a token the client thought was valid
+      // (revocation, clock skew, server-side expiry). Clear credentials
+      // so the rest of the app treats the user as logged out, and
+      // propagate the error so the caller can react.
+      if (err instanceof HttpErrorResponse && err.status === 401) {
+        tokenService.removeToken();
+      }
+      return throwError(() => err);
+    }),
+  );
 }
 
 function refreshAndRetry(

@@ -45,7 +45,6 @@ export class RecoveryFormComponent {
               this.status = 'failed';
               this.errorMessage =
                 err?.error?.message || 'Password change failed. Please try again.';
-              this.router.navigate(['/login']);
             },
           }),
           catchError(() => of(null)),
@@ -57,7 +56,7 @@ export class RecoveryFormComponent {
 
   form = this.formBuilder.nonNullable.group(
     {
-      newPassword: ['', [Validators.minLength(6), Validators.required]],
+      newPassword: ['', [Validators.minLength(8), Validators.required]],
       confirmPassword: ['', [Validators.required]],
     },
     {

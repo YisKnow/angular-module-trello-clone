@@ -36,7 +36,11 @@ function getCookie(name: string): string | null {
 }
 
 function setCookie(name: string, value: string): void {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${365 * 86400}`;
+  // Secure: only set when on HTTPS to keep local http://localhost working.
+  // SameSite=Strict: blocks cross-site CSRF — this is a same-origin SPA so
+  // the trade-off (no cross-site links) is intentional.
+  const secure = location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${365 * 86400}; SameSite=Strict${secure}`;
 }
 
 function removeCookie(name: string): void {

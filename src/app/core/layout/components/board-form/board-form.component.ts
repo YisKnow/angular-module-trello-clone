@@ -34,19 +34,34 @@ export class BoardFormComponent {
     backgroundColor: Colors;
   }>();
 
+  readonly errorMessage = signal<string>('');
+  readonly submitting = signal(false);
+
   readonly createBoardResult = toSignal(
     this.createBoardSubject.pipe(
-      exhaustMap(({ title, backgroundColor }) =>
-        from(this.boardFacade.createBoard(title, backgroundColor)).pipe(
+      exhaustMap(({ title, backgroundColor }) => {
+        this.submitting.set(true);
+        this.errorMessage.set('');
+        return from(this.boardFacade.createBoard(title, backgroundColor)).pipe(
           tap({
             next: (board) => {
+              this.submitting.set(false);
               this.closeOverlay.emit(false);
               this.router.navigate(['/app/boards', board.id]);
             },
+            error: (err: { error?: { message?: string }; status?: number }) => {
+              this.submitting.set(false);
+              this.errorMessage.set(
+                err?.error?.message ||
+                  (err?.status === 401
+                    ? 'Your session expired. Please log in again.'
+                    : 'Could not create the board. Please try again.'),
+              );
+            },
           }),
           catchError(() => of(null)),
-        ),
-      ),
+        );
+      }),
     ),
     { initialValue: null },
   );

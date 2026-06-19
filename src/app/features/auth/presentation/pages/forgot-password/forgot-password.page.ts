@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NgOptimizedImage } from '@angular/common';
 
 import { ForgotPasswordFormComponent } from '@features/auth/presentation/components/forgot-password-form/forgot-password-form.component';
 import { BackgroundComponent } from '@features/auth/presentation/components/background/background.component';
@@ -9,6 +10,7 @@ import { BackgroundComponent } from '@features/auth/presentation/components/back
   standalone: true,
   imports: [
     RouterLink,
+    NgOptimizedImage,
     ForgotPasswordFormComponent,
     BackgroundComponent,
   ],

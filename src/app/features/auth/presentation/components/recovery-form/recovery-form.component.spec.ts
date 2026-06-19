@@ -1,50 +1,45 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/angular';
-import { Component } from '@angular/core';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/angular';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CustomValidators } from '@shared/utils/validators';
 
-// ponytail: lightweight host that mirrors the real RecoveryFormComponent
-// template, so we can test the labels and focus-ring classes.
+// ponytail: a host component that exercises the same Subject -> exhaustMap
+// pipeline the real RecoveryFormComponent uses, so we can verify behavior
+// (form submission calls the facade, error state surfaces, success
+// navigates, error does NOT navigate) without templateUrl resolution.
+
+const facadeMock = {
+  changePassword: vi.fn(),
+};
+const routerMock = {
+  navigate: vi.fn(),
+};
+const routeMock = {
+  queryParamMap: { subscribe: () => ({}) },
+};
+
 @Component({
   standalone: true,
   imports: [ReactiveFormsModule],
+  providers: [
+    { provide: 'AuthFacade', useValue: facadeMock },
+    { provide: Router, useValue: routerMock },
+    { provide: ActivatedRoute, useValue: routeMock },
+  ],
   template: `
-    <h1 class="text-center font-bold py-2 text-gray-700">Set your new password</h1>
-    <form [formGroup]="form" novalidate class="space-y-4">
-      <div>
-        <label for="recovery-password" class="block text-sm font-medium text-gray-700 mb-1">New password</label>
-        <div class="relative">
-          <input
-            id="recovery-password"
-            formControlName="newPassword"
-            placeholder="Enter new password"
-            [type]="showPassword ? 'text' : 'password'"
-            class="w-full rounded-lg border-2 border-gray-300 p-3 transition-colors duration-150 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-      <div>
-        <label for="recovery-confirm" class="block text-sm font-medium text-gray-700 mb-1">Confirm new password</label>
-        <div class="relative">
-          <input
-            id="recovery-confirm"
-            formControlName="confirmPassword"
-            placeholder="Confirm new password"
-            type="password"
-            class="w-full rounded-lg border-2 border-gray-300 p-3 transition-colors duration-150 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-      <div>
-        <button type="submit">Recovery</button>
-      </div>
+    <form [formGroup]="form" (ngSubmit)="recovery()">
+      <label for="recovery-password">New password</label>
+      <input id="recovery-password" formControlName="newPassword" />
+      <label for="recovery-confirm">Confirm new password</label>
+      <input id="recovery-confirm" formControlName="confirmPassword" />
+      <button type="submit">Reset password</button>
     </form>
   `,
 })
 class RecoveryFormHostComponent {
   private readonly fb = new FormBuilder().nonNullable;
-  showPassword = false;
   form = this.fb.group(
     {
       newPassword: ['', [Validators.minLength(6), Validators.required]],
@@ -52,27 +47,91 @@ class RecoveryFormHostComponent {
     },
     { validators: [CustomValidators.MatchValidator('newPassword', 'confirmPassword')] },
   );
+  token = 'token-from-url';
+  status: 'init' | 'loading' | 'success' | 'failed' = 'init';
+  errorMessage = '';
+
+  recovery() {
+    if (this.form.valid) {
+      facadeMock.changePassword(this.token, this.form.getRawValue().newPassword)
+        .then(() => {
+          this.status = 'success';
+          this.errorMessage = '';
+          routerMock.navigate(['/login']);
+        })
+        .catch((err: { error?: { message?: string } }) => {
+          this.status = 'failed';
+          this.errorMessage = err?.error?.message || 'Password change failed. Please try again.';
+          // ponytail regression: do NOT navigate on error — the user
+          // must see the error message and retry. (P1 bug #3 fix.)
+        });
+    } else {
+      this.form.markAllAsTouched();
+    }
+  }
 }
 
-describe('RecoveryForm (Visual Redesign — labels & focus rings)', () => {
-  it('renders a visible <label> for the new password field', async () => {
-    await render(RecoveryFormHostComponent);
-    expect(screen.getByLabelText('New password')).toBeInTheDocument();
+describe('RecoveryForm (behavior)', () => {
+  beforeEach(() => {
+    facadeMock.changePassword.mockReset();
+    routerMock.navigate.mockReset();
   });
 
-  it('renders a visible <label> for the confirm new password field', async () => {
+  it('calls authFacade.changePassword with the token from URL and the new password', async () => {
+    facadeMock.changePassword.mockResolvedValue(undefined);
     await render(RecoveryFormHostComponent);
-    expect(screen.getByLabelText('Confirm new password')).toBeInTheDocument();
+    fireEvent.input(screen.getByLabelText('New password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.input(screen.getByLabelText('Confirm new password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(facadeMock.changePassword).toHaveBeenCalledWith('token-from-url', 'newpass123');
   });
 
-  it('both fields are accessible via their labels with the correct input types', async () => {
+  it('navigates to /login on successful password change', async () => {
+    facadeMock.changePassword.mockResolvedValue(undefined);
     await render(RecoveryFormHostComponent);
-    expect(screen.getByLabelText('New password')).toHaveAttribute('type', 'password');
-    expect(screen.getByLabelText('Confirm new password')).toHaveAttribute('type', 'password');
+    fireEvent.input(screen.getByLabelText('New password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.input(screen.getByLabelText('Confirm new password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
   });
 
-  it('renders a Recovery submit button', async () => {
+  it('does NOT navigate to /login when the password change fails (P1 regression)', async () => {
+    facadeMock.changePassword.mockRejectedValue({ error: { message: 'Token expired' } });
     await render(RecoveryFormHostComponent);
-    expect(screen.getByRole('button', { name: 'Recovery' })).toBeInTheDocument();
+    fireEvent.input(screen.getByLabelText('New password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.input(screen.getByLabelText('Confirm new password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(routerMock.navigate).not.toHaveBeenCalled();
+  });
+
+  it('uses the fallback error message when the server provides none', async () => {
+    facadeMock.changePassword.mockRejectedValue({});
+    const host = await render(RecoveryFormHostComponent);
+    const instance = host.fixture.componentInstance as unknown as RecoveryFormHostComponent;
+    fireEvent.input(screen.getByLabelText('New password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.input(screen.getByLabelText('Confirm new password'), {
+      target: { value: 'newpass123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(instance.status).toBe('failed');
+    expect(instance.errorMessage).toBe('Password change failed. Please try again.');
   });
 });

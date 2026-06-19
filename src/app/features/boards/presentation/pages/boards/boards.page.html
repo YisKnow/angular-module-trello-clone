@@ -5,6 +5,17 @@
     <p class="text-sm text-gray-500 mt-1">{{ boards.value().length }} {{ boards.value().length === 1 ? 'board' : 'boards' }}</p>
   </div>
 
+  @if (boards.error()) {
+    <div data-testid="boards-error" class="mb-4 rounded-lg bg-danger-100 border border-danger-200 px-4 py-3 flex items-center justify-between gap-3">
+      <p class="text-sm text-danger-800">Could not load your boards. Check your connection and try again.</p>
+      <button
+        type="button"
+        (click)="boards.reload()"
+        class="rounded-lg bg-danger-600 hover:bg-danger-700 text-white text-sm font-medium px-3 py-1.5 transition-colors duration-150"
+      >Retry</button>
+    </div>
+  }
+
   @if (boards.isLoading()) {
     <div data-testid="boards-skeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
       @for (placeholder of [0, 1, 2, 3]; track placeholder) {
@@ -19,18 +30,28 @@
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
       @for (board of boards.value(); track board.id) {
-        <a
-          [routerLink]="['/app/boards', board.id]"
-          class="group block rounded-xl overflow-hidden bg-white border border-[#EAEAEA] hover:border-gray-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-all duration-200"
+        <div
+          class="group relative rounded-xl overflow-hidden bg-white border border-[#EAEAEA] hover:border-gray-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-all duration-200"
         >
-          <!-- Color band as the board's "cover" -->
-          <div class="h-20 w-full transition-all duration-200 group-hover:h-24" [ngClass]="coverClass(board.backgroundColor)"></div>
-          <!-- Title area -->
-          <div class="p-4">
-            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ board.title }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Click to open</p>
-          </div>
-        </a>
+          <a [routerLink]="['/app/boards', board.id]" class="block">
+            <!-- Color band as the board's "cover" -->
+            <div class="h-20 w-full transition-all duration-200 group-hover:h-24" [ngClass]="coverClass(board.backgroundColor)"></div>
+            <!-- Title area -->
+            <div class="p-4">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">{{ board.title }}</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Click to open</p>
+            </div>
+          </a>
+          <button
+            type="button"
+            data-testid="delete-board"
+            (click)="deleteBoard(board.id)"
+            class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 bg-white/90 hover:bg-white border border-[#EAEAEA] rounded-lg p-1.5 text-gray-500 hover:text-danger-600 transition-all duration-150"
+            aria-label="Delete board"
+          >
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
       } @empty {
         <div data-testid="empty-state" class="col-span-full">
           <div class="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">

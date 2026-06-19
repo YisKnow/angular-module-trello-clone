@@ -120,13 +120,19 @@ export class BoardPage implements OnDestroy {
   }
 
   async openDialog(card: Card) {
-    const dialogRef = this.dialog.open(TodoDialogComponent, {
-      minWidth: '300px',
-      maxWidth: '50%',
-      data: { card },
-    });
+    const dialogRef = this.dialog.open<{ rta: boolean; description?: string }>(
+      TodoDialogComponent,
+      {
+        minWidth: '300px',
+        maxWidth: '50%',
+        data: { card },
+      },
+    );
     try {
-      await firstValueFrom(dialogRef.closed);
+      const result = await firstValueFrom(dialogRef.closed);
+      if (result && typeof result.description === 'string') {
+        await this.boardFacade.updateCardDescription(card.id, result.description);
+      }
     } catch {
       /* dialog dismissed without data */
     }

@@ -1,4 +1,9 @@
 <form [formRoot]="form" class="space-y-4">
+  @if (errorMessage()) {
+    <div data-testid="board-form-error" class="rounded-lg bg-danger-100 border border-danger-200 px-4 py-3">
+      <p class="text-sm text-danger-800">{{ errorMessage() }}</p>
+    </div>
+  }
   <div>
     <div class="flex flex-wrap gap-3">
       <div class="flex items-center">
@@ -122,6 +127,11 @@
     </div>
   </div>
   <div>
-    <app-btn typeBtn="submit" color="success">Create</app-btn>
+    <app-btn typeBtn="submit" color="success" [disabled]="submitting()">
+      @if (submitting()) {
+        <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span>
+      }
+      Create
+    </app-btn>
   </div>
 </form>

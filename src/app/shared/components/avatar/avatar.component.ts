@@ -1,4 +1,5 @@
 import { Component, computed, input, signal } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 
 import { avatarInitials, avatarUrl } from '@shared/utils/avatar.util';
 
@@ -8,6 +9,7 @@ import { avatarInitials, avatarUrl } from '@shared/utils/avatar.util';
 @Component({
   selector: 'app-avatar',
   standalone: true,
+  imports: [NgOptimizedImage],
   // ponytail: :host sizing is critical because <app-avatar> is a
   // custom element. Without it the host falls back to `display:
   // inline` and inherits the parent's line-height — so a 32x32
@@ -31,7 +33,7 @@ import { avatarInitials, avatarUrl } from '@shared/utils/avatar.util';
     >
       @if (!errorState()) {
         <img
-          [src]="resolvedUrl()"
+          [ngSrc]="resolvedUrl()"
           [alt]="altText()"
           [width]="size()"
           [height]="size()"

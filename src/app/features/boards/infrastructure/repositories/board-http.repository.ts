@@ -40,4 +40,12 @@ export class BoardHttpRepository implements BoardRepository {
     );
     return BoardMapper.toDomain(dto);
   }
+
+  async deleteBoard(id: Board['id']): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<void>(`${this.apiUrl}/api/v1/boards/${id}`, {
+        context: checkToken(),
+      }),
+    );
+  }
 }

@@ -8,6 +8,7 @@ import { List } from '@boards/domain/entities/list.entity';
 import { BOARD_REPOSITORY } from '@boards/domain/repositories/board.repository';
 import { CARD_REPOSITORY } from '@boards/domain/repositories/card.repository';
 import { LIST_REPOSITORY } from '@boards/domain/repositories/list.repository';
+import { ME_REPOSITORY } from '@features/auth/domain/repositories/me.repository';
 
 const makeCard = (id: string, position: number): Card => ({
   id, title: `card-${id}`, position,
@@ -46,6 +47,10 @@ const buildFacade = (overrides: {
       }},
       { provide: LIST_REPOSITORY, useValue: {
         create: overrides.createList ?? vi.fn(),
+      }},
+      { provide: ME_REPOSITORY, useValue: {
+        getMeBoards: vi.fn().mockResolvedValue([]),
+        getMeProfile: vi.fn(),
       }},
     ],
   });

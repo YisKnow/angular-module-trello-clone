@@ -5,7 +5,7 @@
 //
 // If the resolved URL itself fails to load, the consumer should
 // also wire an onerror handler to swap to initialsAvatar() as a
-// last-resort fallback (see avatarFallbackUrl).
+// last-resort fallback.
 
 const FALLBACK_AVATAR =
   'data:image/svg+xml;utf8,' +
@@ -36,12 +36,6 @@ export function avatarUrl(seed: string | number | { id?: number | string; email?
   }
   return `https://i.pravatar.cc/150?u=${seed}`;
 }
-
-/**
- * Last-resort fallback (a generic "?" glyph on a pastel background).
- * Use as the onerror handler when the resolved avatar URL fails.
- */
-export const avatarFallbackUrl = FALLBACK_AVATAR;
 
 /**
  * Build a 2-letter initials string from a user's name.
