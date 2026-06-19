@@ -28,13 +28,13 @@
         "./src/app/models/*"
       ],
       "@shared/*": [
-        "./src/app/modules/shared/*"
+        "./src/app/shared/*"
       ],
       "@auth/*": [
-        "./src/app/modules/auth/*"
+        "./src/app/features/auth/*"
       ],
       "@boards/*": [
-        "./src/app/modules/boards/*"
+        "./src/app/features/boards/*"
       ],
       "@layout/*": [
         "./src/app/modules/layout/*"
@@ -46,16 +46,19 @@
         "./src/environments/*"
       ],
       "@guards/*": [
-        "./src/app/guards/*"
+        "./src/app/core/guards/*"
       ],
       "@interceptors/*": [
-        "./src/app/interceptors/*"
+        "./src/app/core/interceptors/*"
       ],
-      "@services/*": [
-        "./src/app/services/*"
+      "@core/*": [
+        "./src/app/core/*"
+      ],
+      "@features/*": [
+        "./src/app/features/*"
       ],
       "@utils/*": [
-        "./src/app/utils/*"
+        "./src/app/shared/utils/*"
       ]
     }
   },

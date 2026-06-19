@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard } from '@guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { LayoutComponent } from './components/layout/layout.component';
 
 export const LAYOUT_ROUTES: Routes = [
@@ -17,7 +17,7 @@ export const LAYOUT_ROUTES: Routes = [
         path: 'boards',
         canActivate: [authGuard],
         loadChildren: () =>
-          import('@boards/boards.routes').then((m) => m.BOARDS_ROUTES),
+          import('@features/boards/boards.routes').then((m) => m.BOARDS_ROUTES),
       },
       {
         path: 'profile',

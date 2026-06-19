@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { Component, Input } from '@angular/core';
 import { render, screen } from '@testing-library/angular';
 import { NgClass } from '@angular/common';
-import { COLORS, Colors } from '@models/colors.model';
+import { Colors } from '@shared/models/colors.model';
+import { COLORS } from '@shared/utils/colors.utils';
 import { ButtonComponent } from './button.component';
 
 // ---------------------------------------------------------------------------

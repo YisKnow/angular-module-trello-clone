@@ -1,0 +1,154 @@
+import {
+  Component,
+  OnDestroy,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  FormControl,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { NgClass } from '@angular/common';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
+import { Dialog, DialogModule } from '@angular/cdk/dialog';
+import { firstValueFrom } from 'rxjs';
+
+import { BACKGROUNDS } from '@shared/utils/colors.utils';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { Card } from '@boards/domain/entities/card.entity';
+import { List } from '@boards/domain/entities/list.entity';
+import { BoardFacade } from '@boards/application/facades/board.facade';
+import { TodoDialogComponent } from '@boards/presentation/components/todo-dialog/todo-dialog.component';
+
+@Component({
+  selector: 'app-board',
+  standalone: true,
+  imports: [
+    NgClass,
+    ReactiveFormsModule,
+    DragDropModule,
+    DialogModule,
+    ButtonComponent,
+  ],
+  templateUrl: './board.page.html',
+  styles: [
+    `
+      .cdk-drop-list-dragging .cdk-drag {
+        transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+      }
+      .cdk-drag-animating {
+        transition: transform 300ms cubic-bezier(0, 0, 0.2, 1);
+      }
+    `,
+  ],
+})
+export class BoardPage implements OnDestroy {
+  private readonly dialog = inject(Dialog);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly boardFacade = inject(BoardFacade);
+
+  private readonly paramMap = toSignal(this.activatedRoute.paramMap);
+
+  inputCard = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  inputList = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  showListForm = false;
+  colorBackgrounds = BACKGROUNDS;
+
+  // Expose the facade's signals to the template.
+  readonly board = this.boardFacade.board;
+  readonly backgroundColor = this.boardFacade.backgroundColor;
+
+  constructor() {
+    // React to paramMap changes and load the board via the facade.
+    effect(() => {
+      const boardId = this.paramMap()?.get('boardId');
+      if (boardId) {
+        void this.boardFacade.loadBoard(boardId);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.boardFacade.resetBackgroundColor();
+  }
+
+  get colors() {
+    return this.colorBackgrounds[this.backgroundColor()] || {};
+  }
+
+  drop(event: CdkDragDrop<Card[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    }
+    const card = event.container.data[event.currentIndex];
+    void this.boardFacade.moveCard(card, event.currentIndex, event.container.id);
+  }
+
+  addList() {
+    const title = this.inputList.value;
+    if (this.inputList.valid && title) {
+      void this.boardFacade.createList(title);
+      this.inputList.setValue('');
+      this.showListForm = false;
+    }
+  }
+
+  async openDialog(card: Card) {
+    const dialogRef = this.dialog.open(TodoDialogComponent, {
+      minWidth: '300px',
+      maxWidth: '50%',
+      data: { card },
+    });
+    try {
+      await firstValueFrom(dialogRef.closed);
+    } catch {
+      /* dialog dismissed without data */
+    }
+  }
+
+  openFormCard(list: List) {
+    this.boardFacade.openCardForm(list.id);
+  }
+
+  createCard(list: List) {
+    const title = this.inputCard.value;
+    if (this.inputCard.valid && title) {
+      void this.boardFacade.createCard(list, title);
+      this.inputCard.setValue('');
+    }
+  }
+
+  closeCardForm() {
+    this.boardFacade.closeCardForm();
+  }
+
+  isCardFormOpen(list: List): boolean {
+    return this.boardFacade.isCardFormOpen(list.id);
+  }
+}

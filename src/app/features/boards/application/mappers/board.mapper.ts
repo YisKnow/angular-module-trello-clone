@@ -1,0 +1,68 @@
+import { Board } from '../../domain/entities/board.entity';
+import { Card } from '../../domain/entities/card.entity';
+import { List } from '../../domain/entities/list.entity';
+import { User } from '@features/auth/domain/entities/user.entity';
+import { UserDto } from '@features/auth/application/dtos/auth.dto';
+import { AuthMapper } from '@features/auth/application/mappers/auth.mapper';
+import {
+  BoardDto,
+  CardDto,
+  ListDto,
+} from '../dtos/board.dto';
+
+// Pure mappers — convert wire DTOs to domain entities (and back when
+// needed for create/update payloads).
+export const BoardMapper = {
+  toDomain(dto: BoardDto): Board {
+    return {
+      id: dto.id,
+      title: dto.title,
+      backgroundColor: dto.backgroundColor,
+      members: dto.members.map(toUser),
+      lists: dto.lists.map(toList),
+      cards: dto.cards.map(toCard),
+    };
+  },
+};
+
+export const ListMapper = {
+  toDomain(dto: ListDto): List {
+    return {
+      id: dto.id,
+      title: dto.title,
+      position: dto.position,
+      cards: dto.cards.map(toCard),
+    };
+  },
+};
+
+export const CardMapper = {
+  toDomain(dto: CardDto): Card {
+    return {
+      id: dto.id,
+      title: dto.title,
+      description: dto.description,
+      position: dto.position,
+      // Build a placeholder list reference; full list reassembly
+      // happens in BoardMapper.toDomain once the full board is loaded.
+      list: {
+        id: dto.list.id,
+        title: dto.list.title,
+        position: dto.list.position,
+        cards: [],
+      },
+    };
+  },
+};
+
+function toList(dto: ListDto): List {
+  return ListMapper.toDomain(dto);
+}
+
+function toCard(dto: CardDto): Card {
+  return CardMapper.toDomain(dto);
+}
+
+function toUser(dto: UserDto): User {
+  return AuthMapper.toUser(dto);
+}

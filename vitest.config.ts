@@ -6,14 +6,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@models': fileURLToPath(new URL('./src/app/models', import.meta.url)),
-      '@shared': fileURLToPath(
-        new URL('./src/app/modules/shared', import.meta.url),
-      ),
+      '@shared': fileURLToPath(new URL('./src/app/shared', import.meta.url)),
       '@auth': fileURLToPath(
-        new URL('./src/app/modules/auth', import.meta.url),
+        new URL('./src/app/features/auth', import.meta.url),
       ),
       '@boards': fileURLToPath(
-        new URL('./src/app/modules/boards', import.meta.url),
+        new URL('./src/app/features/boards', import.meta.url),
       ),
       '@layout': fileURLToPath(
         new URL('./src/app/modules/layout', import.meta.url),
@@ -24,14 +22,13 @@ export default defineConfig({
       '@environments': fileURLToPath(
         new URL('./src/environments', import.meta.url),
       ),
-      '@guards': fileURLToPath(new URL('./src/app/guards', import.meta.url)),
+      '@guards': fileURLToPath(new URL('./src/app/core/guards', import.meta.url)),
       '@interceptors': fileURLToPath(
-        new URL('./src/app/interceptors', import.meta.url),
+        new URL('./src/app/core/interceptors', import.meta.url),
       ),
-      '@services': fileURLToPath(
-        new URL('./src/app/services', import.meta.url),
-      ),
-      '@utils': fileURLToPath(new URL('./src/app/utils', import.meta.url)),
+      '@core': fileURLToPath(new URL('./src/app/core', import.meta.url)),
+      '@features': fileURLToPath(new URL('./src/app/features', import.meta.url)),
+      '@utils': fileURLToPath(new URL('./src/app/shared/utils', import.meta.url)),
     },
   },
   test: {

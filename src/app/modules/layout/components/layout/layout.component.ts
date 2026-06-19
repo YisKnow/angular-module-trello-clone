@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { catchError, of } from 'rxjs';
+import { catchError, from, of } from 'rxjs';
 import { RouterOutlet } from '@angular/router';
 
-import { User } from '@models/user.model';
+import { User } from '@features/auth/domain/entities/user.entity';
 
-import { AuthService } from '@services/auth.service';
+import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
@@ -15,11 +15,13 @@ import { NavbarComponent } from '../navbar/navbar.component';
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
-  private readonly authService = inject(AuthService);
+  private readonly authFacade = inject(AuthFacade);
 
-  // Fire the profile fetch on init; the auth service updates its user signal via tap.
+  // Fire the profile fetch on init; the auth facade updates its user signal.
   readonly profileResult = toSignal(
-    this.authService.getProfile().pipe(catchError(() => of(null as User | null))),
+    from(this.authFacade.getProfile()).pipe(
+      catchError(() => of(null as User | null)),
+    ),
     { initialValue: null as User | null },
   );
 }
