@@ -46,7 +46,8 @@ skills-lock.json
 
 # Tooling and Agents
 .codex
-.github
 .playwright-mcp
 .opencode
 .impeccable
+.github/skills
+plans/

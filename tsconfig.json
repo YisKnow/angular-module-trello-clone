@@ -24,9 +24,6 @@
       "dom"
     ],
     "paths": {
-      "@models/*": [
-        "./src/app/shared/models/*"
-      ],
       "@shared/*": [
         "./src/app/shared/*"
       ],
@@ -42,20 +39,11 @@
       "@environments/*": [
         "./src/environments/*"
       ],
-      "@guards/*": [
-        "./src/app/core/guards/*"
-      ],
-      "@interceptors/*": [
-        "./src/app/core/interceptors/*"
-      ],
       "@core/*": [
         "./src/app/core/*"
       ],
       "@features/*": [
         "./src/app/features/*"
-      ],
-      "@utils/*": [
-        "./src/app/shared/utils/*"
       ]
     }
   },

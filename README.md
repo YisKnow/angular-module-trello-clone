@@ -1,27 +1,36 @@
 # TrelloAuth
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli).
+A Trello clone built with Angular 22, featuring board management, card drag-drop,
+and JWT-based authentication.
 
-## Development server
+## Quick start
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+```bash
+npm ci
+npm start        # dev server at http://localhost:4200
+npm test         # Vitest (82 tests)
+npm run lint     # angular-eslint
+npm run build    # production build to dist/trello-auth
+```
 
-## Code scaffolding
+## Features
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- **Auth**: Login, register, forgot-password, recovery with JWT tokens in cookies
+- **Boards**: Create, view, and drag-drop cards between lists
+- **Profile**: View account info
+- **Users**: User directory with CDK table
 
-## Build
+## Architecture
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Clean Architecture per feature (4 layers):
+- `domain/` — entities, repository contracts, rules
+- `application/` — facades, DTOs, mappers
+- `infrastructure/` — HTTP repository implementations
+- `presentation/` — components, pages
 
-## Running unit tests
+Cross-cutting concerns in `core/` (guards, interceptors, layout, token service).
+Shared UI in `shared/` (button, card-color components, models, utils).
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## API
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Configured in `src/environments/environment.ts` — defaults to `https://fake-trello-api.herokuapp.com`.

@@ -220,7 +220,7 @@ describe('AuthHttpRepository + AuthFacade', () => {
     expect(user.createdAt).toBe('2024-01-01');
     expect(user.updatedAt).toBe('2024-01-02');
     expect(facade.user()).toEqual(user);
-    expect(facade.getDataUser()).toEqual(user);
+    expect(facade.user()).toEqual(user);
   });
 
   // -----------------------------------------------------------------------
@@ -233,7 +233,7 @@ describe('AuthHttpRepository + AuthFacade', () => {
     facade.logout();
     expect(tokenService.getToken()).toBeFalsy();
     expect(tokenService.getRefreshToken()).toBeFalsy();
-    expect(facade.getDataUser()).toBeNull();
+    expect(facade.user()).toBeNull();
   });
 
   // -----------------------------------------------------------------------

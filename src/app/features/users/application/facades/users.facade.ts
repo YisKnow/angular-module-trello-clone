@@ -11,12 +11,9 @@ export class UsersFacade {
   private readonly _users = signal<User[]>([]);
   readonly users: Signal<User[]> = this._users.asReadonly();
 
-  private readonly usersRepository = inject(USERS_REPOSITORY, {
-    optional: true,
-  });
+  private readonly usersRepository = inject(USERS_REPOSITORY);
 
   async loadUsers(): Promise<User[]> {
-    if (!this.usersRepository) return [];
     const users = await this.usersRepository.getUsers();
     this._users.set(users);
     return users;

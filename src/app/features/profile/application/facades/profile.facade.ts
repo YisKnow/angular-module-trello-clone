@@ -8,10 +8,9 @@ export class ProfileFacade {
   private readonly _profile = signal<User | null>(null);
   readonly profile: Signal<User | null> = this._profile.asReadonly();
 
-  private readonly meRepository = inject(ME_REPOSITORY, { optional: true });
+  private readonly meRepository = inject(ME_REPOSITORY);
 
   async loadProfile(): Promise<User | null> {
-    if (!this.meRepository) return null;
     try {
       const user = await this.meRepository.getMeProfile();
       this._profile.set(user);
@@ -19,9 +18,5 @@ export class ProfileFacade {
     } catch {
       return null;
     }
-  }
-
-  getProfile(): Promise<User | null> {
-    return this.loadProfile();
   }
 }

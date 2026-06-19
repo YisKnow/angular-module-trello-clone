@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 export default defineConfig({
   resolve: {
     alias: {
-      '@models': fileURLToPath(new URL('./src/app/shared/models', import.meta.url)),
       '@shared': fileURLToPath(new URL('./src/app/shared', import.meta.url)),
       '@auth': fileURLToPath(
         new URL('./src/app/features/auth', import.meta.url),
@@ -19,13 +18,8 @@ export default defineConfig({
       '@environments': fileURLToPath(
         new URL('./src/environments', import.meta.url),
       ),
-      '@guards': fileURLToPath(new URL('./src/app/core/guards', import.meta.url)),
-      '@interceptors': fileURLToPath(
-        new URL('./src/app/core/interceptors', import.meta.url),
-      ),
       '@core': fileURLToPath(new URL('./src/app/core', import.meta.url)),
       '@features': fileURLToPath(new URL('./src/app/features', import.meta.url)),
-      '@utils': fileURLToPath(new URL('./src/app/shared/utils', import.meta.url)),
     },
   },
   test: {

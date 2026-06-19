@@ -1,8 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { NAVBAR_BACKGROUNDS } from '@shared/utils/colors.utils';
+import { Colors } from '@shared/models/colors.model';
 
 import { AuthFacade } from '@features/auth/application/facades/auth.facade';
 import { ButtonComponent } from '@shared/components/button/button.component';
@@ -34,11 +35,11 @@ export class NavbarComponent {
   // Background color is sourced from the board feature; the navbar
   // reads it via shared route state in the boards page. For now we
   // default to 'sky' until the boards facade is wired in.
-  navBarBackgroundColor = computed(() => 'sky' as const);
+  readonly navBarBackgroundColor: Colors = 'sky';
 
-  colors = computed(() => {
-    return this.navBarColors[this.navBarBackgroundColor()] || {};
-  });
+  get colors() {
+    return this.navBarColors[this.navBarBackgroundColor] || {};
+  }
 
   logout() {
     this.authFacade.logout();

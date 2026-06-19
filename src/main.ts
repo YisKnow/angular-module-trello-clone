@@ -1,4 +1,3 @@
-import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
@@ -17,11 +16,6 @@ import { ME_REPOSITORY } from './app/features/auth/domain/repositories/me.reposi
 import { MeHttpRepository } from './app/features/auth/infrastructure/repositories/me-http.repository';
 import { USERS_REPOSITORY } from './app/features/users/domain/repositories/users.repository';
 import { UsersHttpRepository } from './app/features/users/infrastructure/repositories/users-http.repository';
-import { environment } from './environments/environment';
-
-if (environment.production) {
-  enableProdMode();
-}
 
 bootstrapApplication(AppComponent, {
   providers: [

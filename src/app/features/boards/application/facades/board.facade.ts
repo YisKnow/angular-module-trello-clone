@@ -6,9 +6,9 @@ import { Board } from '../../domain/entities/board.entity';
 import { Card } from '../../domain/entities/card.entity';
 import { List } from '../../domain/entities/list.entity';
 import { getCardPosition, getPositionForNewItem } from '../../domain/rules/position.rule';
-import { BOARD_REPOSITORY, BoardRepository } from '../../domain/repositories/board.repository';
-import { CARD_REPOSITORY, CardRepository } from '../../domain/repositories/card.repository';
-import { LIST_REPOSITORY, ListRepository } from '../../domain/repositories/list.repository';
+import { BOARD_REPOSITORY } from '../../domain/repositories/board.repository';
+import { CARD_REPOSITORY } from '../../domain/repositories/card.repository';
+import { LIST_REPOSITORY } from '../../domain/repositories/list.repository';
 
 type RequestStatus = 'init' | 'loading' | 'success' | 'failed';
 const DEFAULT_BG: Colors = 'sky';
@@ -27,14 +27,14 @@ export class BoardFacade {
   );
 
   // ponytail: inlined use case wrappers — call repositories directly.
-  private readonly boardRepository = inject(BOARD_REPOSITORY, { optional: true });
-  private readonly cardRepository = inject(CARD_REPOSITORY, { optional: true });
-  private readonly listRepository = inject(LIST_REPOSITORY, { optional: true });
+  private readonly boardRepository = inject(BOARD_REPOSITORY);
+  private readonly cardRepository = inject(CARD_REPOSITORY);
+  private readonly listRepository = inject(LIST_REPOSITORY);
 
   async loadBoard(id: Board['id']): Promise<void> {
     this._status.set('loading');
     try {
-      const board = await this.boardRepos().getBoard(id);
+      const board = await this.boardRepository.getBoard(id);
       this._board.set(board);
       this._status.set('success');
     } catch {
@@ -44,7 +44,7 @@ export class BoardFacade {
   }
 
   createBoard(title: string, backgroundColor: Colors): Promise<Board> {
-    return this.boardRepos().createBoard(title, backgroundColor);
+    return this.boardRepository.createBoard(title, backgroundColor);
   }
 
   async moveCard(card: Card, position: number, listId: string | number): Promise<void> {
@@ -72,12 +72,10 @@ export class BoardFacade {
     this._board.set(updated);
 
     try {
-      await this.cardRepos().update(card.id, { position, listId });
+      await this.cardRepository.update(card.id, { position, listId });
     } catch (err) {
-      if (this.boardRepository) {
-        const refreshed = await this.boardRepository.getBoard(current.id);
-        this._board.set(refreshed);
-      }
+      const refreshed = await this.boardRepository.getBoard(current.id);
+      this._board.set(refreshed);
       throw err;
     }
   }
@@ -86,7 +84,7 @@ export class BoardFacade {
     const current = this._board();
     if (!current) return;
     const position = getPositionForNewItem(list.cards);
-    const card = await this.cardRepos().create({ title, position, listId: list.id, boardId: current.id });
+    const card = await this.cardRepository.create({ title, position, listId: list.id, boardId: current.id });
     const updated: Board = {
       ...current,
       lists: current.lists.map((l) => {
@@ -102,7 +100,7 @@ export class BoardFacade {
     const current = this._board();
     if (!current) return;
     const position = getPositionForNewItem(current.lists);
-    const list = await this.listRepos().create({ title, position, boardId: current.id });
+    const list = await this.listRepository.create({ title, position, boardId: current.id });
     this._board.set({ ...current, lists: [...current.lists, { ...list, cards: [] }] });
   }
 
@@ -111,8 +109,4 @@ export class BoardFacade {
   isCardFormOpen(listId: string): boolean { return this._openCardFormListId() === listId; }
 
   resetBackgroundColor(): void { this._board.set(null); }
-
-  private boardRepos(): BoardRepository { if (!this.boardRepository) throw new Error('Board repo not available'); return this.boardRepository; }
-  private cardRepos(): CardRepository { if (!this.cardRepository) throw new Error('Card repo not available'); return this.cardRepository; }
-  private listRepos(): ListRepository { if (!this.listRepository) throw new Error('List repo not available'); return this.listRepository; }
 }

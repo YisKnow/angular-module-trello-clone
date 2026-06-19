@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 
-import { Observable, ReplaySubject, firstValueFrom, share } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import { environment } from '@environments/environment';
 
@@ -114,9 +114,10 @@ export class AuthHttpRepository implements AuthRepository {
     );
   }
 
-  // Single-flight refresh. Uses a ReplaySubject to share the in-flight
-  // promise with concurrent callers. After the promise resolves, the
-  // slot is cleared so the next refresh starts a fresh network call.
+  // Single-flight refresh. Uses a Promise slot for single-flight
+  // refresh — concurrent callers receive the same in-flight promise.
+  // After the promise resolves, the slot is cleared so the next refresh
+  // starts a fresh network call.
   refreshShare(): Promise<AuthTokens> {
     if (this.refreshPromise) {
       return this.refreshPromise;
